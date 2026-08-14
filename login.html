@@ -18,14 +18,16 @@
   body{
     margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif;
-    padding:24px;
+    padding:32px 20px;
   }
   a{color:inherit;}
   .card{
     width:100%; max-width:400px; background:#fff;
     border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius);
     padding:40px 34px 34px;
+    transition:max-width 0.15s ease;
   }
+  .card.wide{ max-width:560px; }
   .brand{
     display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
     font-family:'Fraunces',serif; font-size:17px; font-weight:600; margin-bottom:28px;
@@ -59,12 +61,38 @@
   .divider::before, .divider::after{ content:''; flex:1; height:1px; background:rgba(22,33,29,0.14); }
 
   form{ display:flex; flex-direction:column; gap:14px; }
-  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:-6px; }
-  input{
+  .row{ display:flex; gap:12px; }
+  .row > div{ flex:1; min-width:0; }
+  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:-6px; display:block; }
+  input, select{
     width:100%; padding:12px 13px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
-    font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper);
+    font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper); color:var(--ink);
   }
-  input:focus-visible{ outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass); }
+  select:disabled{ opacity:0.5; }
+  input:focus-visible, select:focus-visible{ outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass); }
+
+  .pill-group{ display:flex; gap:8px; }
+  .pill-group input[type=radio]{ position:absolute; opacity:0; width:0; height:0; }
+  .pill-group label{
+    flex:1; text-align:center; padding:10px 8px; border:1px solid rgba(22,33,29,0.2);
+    border-radius:var(--radius); font-size:13.5px; font-weight:600; color:var(--ink-soft);
+    cursor:pointer; margin:0;
+  }
+  .pill-group input[type=radio]:checked + label{
+    background:var(--lake-deep); color:var(--paper); border-color:var(--lake-deep);
+  }
+  .pill-group input[type=radio]:focus-visible + label{ outline:2px solid var(--brass); outline-offset:1px; }
+
+  fieldset{ border:none; margin:0; padding:0; }
+  legend{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:8px; padding:0; }
+
+  .section-block{
+    border:1px solid rgba(22,33,29,0.14); border-radius:var(--radius); padding:16px; margin-top:2px;
+  }
+  .section-title{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:12px;
+  }
 
   .btn-primary{
     background:var(--walnut); color:var(--paper); border:none; border-radius:var(--radius);
@@ -74,34 +102,32 @@
   .btn-primary:hover{ background:#5a3620; }
   .btn-primary:disabled{ opacity:0.6; cursor:wait; }
 
-  .msg{
-    font-size:13.5px; padding:10px 12px; border-radius:var(--radius); display:none; line-height:1.5;
-  }
+  .msg{ font-size:13.5px; padding:10px 12px; border-radius:var(--radius); display:none; line-height:1.5; }
   .msg.error{ background:#FBEAE6; color:var(--error); display:block; }
   .msg.success{ background:#E9F0E5; color:#3D5E33; display:block; }
 
-  .switch-mode{
-    text-align:center; margin-top:22px; font-size:14px; color:var(--ink-soft);
-  }
+  .switch-mode{ text-align:center; margin-top:22px; font-size:14px; color:var(--ink-soft); }
   .switch-mode button{
     background:none; border:none; color:var(--lake-mid); font-weight:600; cursor:pointer;
     font-family:'Inter',sans-serif; font-size:14px; padding:0; text-decoration:underline;
   }
-  .back-link{
-    display:block; text-align:center; margin-top:18px; font-size:13px; color:var(--ink-soft); text-decoration:none;
-  }
+  .back-link{ display:block; text-align:center; margin-top:18px; font-size:13px; color:var(--ink-soft); text-decoration:none; }
   .back-link:hover{ color:var(--ink); }
 
   .signed-in-panel{ display:none; text-align:center; }
   .signed-in-panel.active{ display:block; }
-  .avatar{
-    width:56px; height:56px; border-radius:50%; margin:0 auto 16px; display:block; background:var(--paper-warm);
+
+  #signInView, #registerView{ display:none; }
+  #signInView.active, #registerView.active{ display:block; }
+
+  @media (max-width:480px){
+    .row{ flex-direction:column; }
   }
 </style>
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="card">
   <a href="index.html" class="brand">
     <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
       <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
@@ -111,10 +137,12 @@
     Lakewood Estate
   </a>
 
-  <!-- SIGNED OUT: sign-in / register form -->
-  <div id="authPanel">
-    <h1 id="formTitle">Welcome back</h1>
-    <p class="sub" id="formSub">Sign in to access resident services and forms.</p>
+  <div id="msgBox" class="msg"></div>
+
+  <!-- ============ SIGN IN VIEW ============ -->
+  <div id="signInView" class="active">
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to access resident services and forms.</p>
 
     <button class="oauth-btn" id="googleBtn">
       <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.7 0-14.4 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.8 14.3-5l-6.6-5.6c-2.1 1.5-4.8 2.5-7.7 2.5-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.6 5.6C40.9 36.5 45 31 45 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
@@ -127,25 +155,132 @@
 
     <div class="divider">or</div>
 
-    <div id="msgBox" class="msg"></div>
-
-    <form id="emailForm">
-      <label for="email">Email</label>
-      <input type="email" id="email" autocomplete="email" required placeholder="you@example.com" />
-
-      <label for="password">Password</label>
-      <input type="password" id="password" autocomplete="current-password" required placeholder="At least 6 characters" minlength="6" />
-
-      <button type="submit" class="btn-primary" id="submitBtn">Sign in</button>
+    <form id="signInForm">
+      <div>
+        <label for="siEmail">Email</label>
+        <input type="email" id="siEmail" autocomplete="email" required placeholder="you@example.com" />
+      </div>
+      <div>
+        <label for="siPassword">Password</label>
+        <input type="password" id="siPassword" autocomplete="current-password" required placeholder="Your password" />
+      </div>
+      <button type="submit" class="btn-primary" id="signInBtn">Sign in</button>
     </form>
 
     <div class="switch-mode">
-      <span id="switchText">Don't have an account?</span>
-      <button type="button" id="switchBtn">Create one</button>
+      <span>Don't have an account?</span>
+      <button type="button" id="toRegisterBtn">Create one</button>
     </div>
   </div>
 
-  <!-- SIGNED IN: confirmation panel -->
+  <!-- ============ REGISTER VIEW ============ -->
+  <div id="registerView">
+    <h1>Register as a resident</h1>
+    <p class="sub">Fill in your details so the committee can verify your flat and grant access.</p>
+
+    <form id="registerForm">
+      <div>
+        <label for="rName">Full name</label>
+        <input type="text" id="rName" required placeholder="As per society records" />
+      </div>
+
+      <fieldset>
+        <legend>Occupant type</legend>
+        <div class="pill-group">
+          <input type="radio" name="occupantType" id="occOwner" value="Owner" checked>
+          <label for="occOwner">Owner</label>
+          <input type="radio" name="occupantType" id="occTenant" value="Tenant">
+          <label for="occTenant">Tenant</label>
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <div>
+          <label for="rEmail">Email</label>
+          <input type="email" id="rEmail" autocomplete="email" required placeholder="you@example.com" />
+        </div>
+        <div>
+          <label for="rMobile">Mobile number</label>
+          <input type="tel" id="rMobile" required placeholder="10-digit number" pattern="[0-9]{10}" maxlength="10" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="rPassword">Password</label>
+          <input type="password" id="rPassword" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters" />
+        </div>
+        <div>
+          <label for="rPassword2">Verify password</label>
+          <input type="password" id="rPassword2" autocomplete="new-password" required minlength="6" placeholder="Re-enter password" />
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Flat details</div>
+        <div class="row">
+          <div>
+            <label for="rTower">Tower</label>
+            <select id="rTower" required>
+              <option value="">Select</option>
+              <option value="1">Tower 1</option>
+              <option value="2">Tower 2</option>
+              <option value="3">Tower 3</option>
+              <option value="4">Tower 4</option>
+              <option value="5">Tower 5</option>
+              <option value="6">Tower 6</option>
+            </select>
+          </div>
+          <div>
+            <label for="rFloor">Floor</label>
+            <select id="rFloor" required disabled>
+              <option value="">Select tower first</option>
+            </select>
+          </div>
+          <div>
+            <label for="rFlat">Flat</label>
+            <select id="rFlat" required disabled>
+              <option value="">Select tower first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Parking</div>
+        <fieldset>
+          <legend>Parking type</legend>
+          <div class="pill-group">
+            <input type="radio" name="parkingType" id="pkOpen" value="Open" checked>
+            <label for="pkOpen">Open</label>
+            <input type="radio" name="parkingType" id="pkCovered" value="Covered">
+            <label for="pkCovered">Covered</label>
+            <input type="radio" name="parkingType" id="pkBasement" value="Basement">
+            <label for="pkBasement">Basement</label>
+          </div>
+        </fieldset>
+        <div class="row" style="margin-top:14px;">
+          <div>
+            <label for="rParkingNumber">Parking number</label>
+            <input type="text" id="rParkingNumber" placeholder="e.g. B-24" />
+          </div>
+          <div>
+            <label for="rVehicleNumber">Vehicle number</label>
+            <input type="text" id="rVehicleNumber" placeholder="e.g. WB 06 AB 1234" />
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="registerBtn">Create account</button>
+    </form>
+
+    <div class="switch-mode">
+      <span>Already have an account?</span>
+      <button type="button" id="toSignInBtn">Sign in</button>
+    </div>
+  </div>
+
+  <!-- ============ SIGNED IN VIEW ============ -->
   <div class="signed-in-panel" id="signedInPanel">
     <h1>You're signed in</h1>
     <p class="sub" id="whoText"></p>
@@ -155,14 +290,10 @@
   <a href="index.html" class="back-link">← Back to home</a>
 </div>
 
-<!-- Firebase SDKs (compat build — plain script tags, no build step needed) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
-  /* =====================================================================
-     PASTE YOUR FIREBASE CONFIG HERE
-     (From Firebase Console → Project settings → your web app → SDK setup)
-     ===================================================================== */
   const firebaseConfig = {
     apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
     authDomain: "lakewood-estate.firebaseapp.com",
@@ -171,81 +302,130 @@
     messagingSenderId: "730103645174",
     appId: "1:730103645174:web:c8af4a01c36bd53df9bdd7"
   };
-  /* ===================================================================== */
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  // ---- DOM refs ----
-  const authPanel = document.getElementById('authPanel');
+  // ---- view switching ----
+  const card = document.getElementById('card');
+  const signInView = document.getElementById('signInView');
+  const registerView = document.getElementById('registerView');
   const signedInPanel = document.getElementById('signedInPanel');
-  const formTitle = document.getElementById('formTitle');
-  const formSub = document.getElementById('formSub');
-  const submitBtn = document.getElementById('submitBtn');
-  const switchText = document.getElementById('switchText');
-  const switchBtn = document.getElementById('switchBtn');
   const msgBox = document.getElementById('msgBox');
-  const emailForm = document.getElementById('emailForm');
-  const whoText = document.getElementById('whoText');
 
-  let mode = 'signin'; // or 'register'
-
-  function showMessage(text, type){
-    msgBox.textContent = text;
-    msgBox.className = 'msg ' + type;
-  }
-  function clearMessage(){
-    msgBox.className = 'msg';
-    msgBox.textContent = '';
-  }
-
-  switchBtn.addEventListener('click', () => {
-    mode = mode === 'signin' ? 'register' : 'signin';
+  function showView(view){
+    signInView.classList.remove('active');
+    registerView.classList.remove('active');
+    signedInPanel.classList.remove('active');
     clearMessage();
-    if(mode === 'register'){
-      formTitle.textContent = 'Create your account';
-      formSub.textContent = 'Register with your email to access resident services.';
-      submitBtn.textContent = 'Create account';
-      switchText.textContent = 'Already have an account?';
-      switchBtn.textContent = 'Sign in';
-    } else {
-      formTitle.textContent = 'Welcome back';
-      formSub.textContent = 'Sign in to access resident services and forms.';
-      submitBtn.textContent = 'Sign in';
-      switchText.textContent = "Don't have an account?";
-      switchBtn.textContent = 'Create one';
+    if(view === 'signin'){ signInView.classList.add('active'); card.classList.remove('wide'); }
+    if(view === 'register'){ registerView.classList.add('active'); card.classList.add('wide'); }
+    if(view === 'signedin'){ signedInPanel.classList.add('active'); card.classList.remove('wide'); }
+  }
+  document.getElementById('toRegisterBtn').addEventListener('click', () => showView('register'));
+  document.getElementById('toSignInBtn').addEventListener('click', () => showView('signin'));
+
+  function showMessage(text, type){ msgBox.textContent = text; msgBox.className = 'msg ' + type; }
+  function clearMessage(){ msgBox.className = 'msg'; msgBox.textContent = ''; }
+
+  // ---- Tower → Floor / Flat dependent selects ----
+  const towerSelect = document.getElementById('rTower');
+  const floorSelect = document.getElementById('rFloor');
+  const flatSelect = document.getElementById('rFlat');
+
+  function fillOptions(select, values, placeholder){
+    select.innerHTML = `<option value="">${placeholder}</option>` +
+      values.map(v => `<option value="${v}">${v}</option>`).join('');
+  }
+
+  towerSelect.addEventListener('change', () => {
+    const tower = towerSelect.value;
+    if(!tower){
+      floorSelect.disabled = true; flatSelect.disabled = true;
+      fillOptions(floorSelect, [], 'Select tower first');
+      fillOptions(flatSelect, [], 'Select tower first');
+      return;
     }
+    const isSmallTower = (tower === '1' || tower === '2');
+    const floorCount = isSmallTower ? 12 : 18;
+    const floors = Array.from({length: floorCount}, (_, i) => i + 1);
+    const flats = isSmallTower ? ['A','B','C','D'] : ['A','B','C','D','E'];
+
+    fillOptions(floorSelect, floors, 'Select floor');
+    fillOptions(flatSelect, flats, 'Select flat');
+    floorSelect.disabled = false;
+    flatSelect.disabled = false;
   });
 
-  emailForm.addEventListener('submit', async (e) => {
+  // ---- Sign in ----
+  document.getElementById('signInForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMessage();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    submitBtn.disabled = true;
-    submitBtn.textContent = mode === 'register' ? 'Creating account…' : 'Signing in…';
-
+    const btn = document.getElementById('signInBtn');
+    btn.disabled = true; btn.textContent = 'Signing in…';
     try {
-      if(mode === 'register'){
-        await auth.createUserWithEmailAndPassword(email, password);
-      } else {
-        await auth.signInWithEmailAndPassword(email, password);
-      }
-      // onAuthStateChanged below handles the redirect/UI update
+      await auth.signInWithEmailAndPassword(
+        document.getElementById('siEmail').value.trim(),
+        document.getElementById('siPassword').value
+      );
     } catch (err) {
       showMessage(friendlyError(err.code), 'error');
-      submitBtn.disabled = false;
-      submitBtn.textContent = mode === 'register' ? 'Create account' : 'Sign in';
+    }
+    btn.disabled = false; btn.textContent = 'Sign in';
+  });
+
+  // ---- Google sign in ----
+  document.getElementById('googleBtn').addEventListener('click', async () => {
+    clearMessage();
+    try {
+      await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    } catch (err) {
+      showMessage(friendlyError(err.code), 'error');
     }
   });
 
-  document.getElementById('googleBtn').addEventListener('click', async () => {
+  // ---- Register ----
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
     clearMessage();
-    const provider = new firebase.auth.GoogleAuthProvider();
+
+    const name = document.getElementById('rName').value.trim();
+    const occupantType = document.querySelector('input[name=occupantType]:checked').value;
+    const email = document.getElementById('rEmail').value.trim();
+    const mobile = document.getElementById('rMobile').value.trim();
+    const password = document.getElementById('rPassword').value;
+    const password2 = document.getElementById('rPassword2').value;
+    const tower = towerSelect.value;
+    const floor = floorSelect.value;
+    const flat = flatSelect.value;
+    const parkingType = document.querySelector('input[name=parkingType]:checked').value;
+    const parkingNumber = document.getElementById('rParkingNumber').value.trim();
+    const vehicleNumber = document.getElementById('rVehicleNumber').value.trim();
+
+    if(password !== password2){
+      showMessage('Passwords do not match.', 'error');
+      return;
+    }
+    if(!tower || !floor || !flat){
+      showMessage('Please select tower, floor and flat.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true; btn.textContent = 'Creating account…';
+
     try {
-      await auth.signInWithPopup(provider);
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: name });
+      await db.collection('residents').doc(cred.user.uid).set({
+        name, occupantType, email, mobile,
+        tower, floor, flat,
+        parkingType, parkingNumber, vehicleNumber,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
     } catch (err) {
       showMessage(friendlyError(err.code), 'error');
+      btn.disabled = false; btn.textContent = 'Create account';
     }
   });
 
@@ -253,14 +433,10 @@
 
   auth.onAuthStateChanged((user) => {
     if(user){
-      authPanel.style.display = 'none';
-      signedInPanel.classList.add('active');
-      whoText.textContent = `Signed in as ${user.email || user.displayName || 'resident'}.`;
+      showView('signedin');
+      document.getElementById('whoText').textContent = `Signed in as ${user.displayName || user.email}.`;
     } else {
-      authPanel.style.display = 'block';
-      signedInPanel.classList.remove('active');
-      submitBtn.disabled = false;
-      submitBtn.textContent = mode === 'register' ? 'Create account' : 'Sign in';
+      showView('signin');
     }
   });
 
@@ -272,8 +448,7 @@
       'auth/email-already-in-use': 'An account already exists with that email. Try signing in instead.',
       'auth/weak-password': 'Password should be at least 6 characters.',
       'auth/popup-closed-by-user': 'Sign-in was cancelled.',
-      'auth/invalid-credential': 'Incorrect email or password.',
-      'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Site isn\u2019t connected to Firebase yet \u2014 paste your config keys into login.html.'
+      'auth/invalid-credential': 'Incorrect email or password.'
     };
     return map[code] || 'Something went wrong. Please try again.';
   }
