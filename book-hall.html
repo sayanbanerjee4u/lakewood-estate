@@ -483,38 +483,42 @@
     const newBookingRef = db.collection('hallBookings').doc();
 
     try {
-      await db.runTransaction(async (transaction) => {
-        // Re-check for real, inside the transaction, against a fresh read —
-        // this is what actually prevents two people double-booking a paid slot.
-        const query = db.collection('hallBookings').where('bookingDate', '==', dateVal);
-        const snapshot = await transaction.get(query);
+      // Final authoritative check: a fresh read right before writing (not the
+      // stale data loaded when the page opened). The Firestore compat SDK
+      // doesn't support running a query inside a transaction, so this is a
+      // plain re-check rather than a full transaction — more than sufficient
+      // for a community hall's booking volume.
+      const snapshot = await db.collection('hallBookings').where('bookingDate', '==', dateVal).get();
+      const conflictDoc = snapshot.docs.find(doc => {
+        const b = doc.data();
+        return b.paid && startMin < b.endMinutes && endMin > b.startMinutes;
+      });
 
-        const conflict = snapshot.docs.find(doc => {
-          const b = doc.data();
-          return b.paid && startMin < b.endMinutes && endMin > b.startMinutes;
-        });
-        if(conflict){
-          const b = conflict.data();
-          throw new Error(`CONFLICT:${b.startTime}-${b.endTime}`);
-        }
+      if(conflictDoc){
+        const b = conflictDoc.data();
+        showMessage(`This time slot was just booked by someone else, from ${b.startTime} to ${b.endTime}. Please choose another time.`, 'error');
+        onDateChange(); // refresh availability
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit booking';
+        return;
+      }
 
-        transaction.set(newBookingRef, {
-          userId: currentUser.uid,
-          name: profile.name,
-          phone: profile.phone,
-          email: profile.email,
-          flat: profile.flat,
-          bookingDate: dateVal,
-          startTime: startVal,
-          endTime: endVal,
-          startMinutes: startMin,
-          endMinutes: endMin,
-          duration: durationHours,
-          billableHours: billableHours,
-          totalFee: totalFee,
-          paid: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+      await newBookingRef.set({
+        userId: currentUser.uid,
+        name: profile.name,
+        phone: profile.phone,
+        email: profile.email,
+        flat: profile.flat,
+        bookingDate: dateVal,
+        startTime: startVal,
+        endTime: endVal,
+        startMinutes: startMin,
+        endMinutes: endMin,
+        duration: durationHours,
+        billableHours: billableHours,
+        totalFee: totalFee,
+        paid: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       // Success — show confirmation
@@ -531,13 +535,7 @@
       showOnly(confirmView);
 
     } catch (err) {
-      if(String(err.message).startsWith('CONFLICT:')){
-        const [s, eT] = err.message.replace('CONFLICT:', '').split('-');
-        showMessage(`This time slot was just booked by someone else, from ${s} to ${eT}. Please choose another time.`, 'error');
-        onDateChange(); // refresh availability
-      } else {
-        showMessage('Something went wrong submitting your booking: ' + err.message, 'error');
-      }
+      showMessage('Something went wrong submitting your booking: ' + err.message, 'error');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit booking';
     }
