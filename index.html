@@ -441,6 +441,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
@@ -452,6 +453,54 @@
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ---- Load live announcements ----
+  async function loadHomepageAnnouncements(){
+    const list = document.getElementById('announceList');
+    try {
+      const snapshot = await db.collection('announcements').orderBy('publishAt', 'desc').get();
+      const now = new Date();
+
+      const visible = snapshot.docs
+        .map(doc => doc.data())
+        .filter(d => {
+          if(d.show === false) return false;
+          const publishAt = d.publishAt ? d.publishAt.toDate() : null;
+          const expiryAt = d.expiryAt ? d.expiryAt.toDate() : null;
+          if(publishAt && publishAt > now) return false;
+          if(expiryAt && expiryAt < now) return false;
+          return true;
+        });
+
+      if(visible.length === 0){
+        list.innerHTML = '<div class="announce-item"><p>No announcements right now — check back soon.</p></div>';
+        return;
+      }
+
+      list.innerHTML = visible.map(d => {
+        const publishAt = d.publishAt ? d.publishAt.toDate() : null;
+        const dateLabel = publishAt ? publishAt.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }) : '';
+        return `
+          <div class="announce-item">
+            <span class="date">${dateLabel}</span>
+            <div>
+              <h4>${escapeHtml(d.title)}</h4>
+              <p>${escapeHtml(d.description)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      list.innerHTML = `<div class="announce-item"><p>Couldn\u2019t load announcements right now.</p></div>`;
+    }
+  }
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+  loadHomepageAnnouncements();
   const navAuthArea = document.getElementById('navAuthArea');
 
   auth.onAuthStateChanged((user) => {
