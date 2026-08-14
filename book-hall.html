@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Community Hall — Lakewood Estate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lake-deep:#0F3A3A; --lake-mid:#1E5F57; --moss:#7C9473;
+    --walnut:#6B4226; --paper:#EEF0E6; --paper-warm:#E4E6D8;
+    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E; --error:#A6402F;
+    --green:#3D5E33; --yellow:#C79A3D; --red:#A6402F;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
+
+  header{ background:#fff; border-bottom:1px solid rgba(22,33,29,0.1); }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:72px; }
+  .brand{
+    display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
+    font-family:'Fraunces',serif; font-size:18px; font-weight:600;
+  }
+  .brand-mark{ width:24px; height:24px; flex-shrink:0; }
+  .back-link{ font-size:13.5px; color:var(--ink-soft); text-decoration:none; }
+  .back-link:hover{ color:var(--ink); }
+
+  main{ padding:40px 0 80px; }
+  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:28px; margin:0 0 6px; }
+  .sub{ font-size:14.5px; color:var(--ink-soft); margin:0 0 28px; line-height:1.5; }
+
+  .panel{
+    background:#fff; border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius);
+    padding:26px 28px; margin-bottom:24px;
+  }
+  .panel h2{ font-family:'Fraunces',serif; font-weight:500; font-size:18px; margin:0 0 18px; }
+
+  .profile-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .profile-field{ background:var(--paper); border:1px solid rgba(22,33,29,0.14); border-radius:var(--radius); padding:11px 13px; }
+  .profile-field .label{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:4px;
+  }
+  .profile-field .value{ font-size:14.5px; font-weight:600; }
+
+  form{ display:flex; flex-direction:column; gap:16px; }
+  .row{ display:flex; gap:14px; }
+  .row > div{ flex:1; min-width:0; }
+  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px; display:block; }
+  input{
+    width:100%; padding:11px 13px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
+    font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper); color:var(--ink);
+  }
+  input:focus-visible{ outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass); }
+
+  /* Timeline */
+  .timeline-scroll{ overflow-x:auto; padding-bottom:6px; }
+  .timeline-track{
+    position:relative; height:52px; min-width:900px; background:var(--green); opacity:0.15;
+    border-radius:var(--radius);
+  }
+  .timeline-wrap{ position:relative; min-width:900px; }
+  .timeline-track-bg{
+    position:absolute; inset:0; background:rgba(61,94,51,0.14); border-radius:var(--radius); height:52px;
+  }
+  .timeline-segment{
+    position:absolute; top:0; height:52px; border-radius:var(--radius);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#fff; overflow:hidden; white-space:nowrap;
+  }
+  .seg-yellow{ background:var(--yellow); }
+  .seg-red{ background:var(--red); }
+  .timeline-labels{
+    position:relative; min-width:900px; display:flex; justify-content:space-between;
+    margin-top:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+  }
+  .legend{ display:flex; gap:18px; margin-top:14px; font-size:12.5px; color:var(--ink-soft); flex-wrap:wrap; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+  .legend .i-green{ background:var(--green); opacity:0.5; }
+  .legend .i-yellow{ background:var(--yellow); }
+  .legend .i-red{ background:var(--red); }
+
+  .fee-box{
+    background:var(--paper-warm); border-radius:var(--radius); padding:18px 20px;
+    display:flex; justify-content:space-between; align-items:center; margin-top:4px;
+  }
+  .fee-box .fee-label{ font-size:13.5px; color:var(--ink-soft); }
+  .fee-box .fee-amount{ font-family:'Fraunces',serif; font-size:26px; font-weight:600; }
+  .fee-detail{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+
+  .msg{ font-size:13.5px; padding:11px 13px; border-radius:var(--radius); display:none; line-height:1.55; }
+  .msg.error{ background:#FBEAE6; color:var(--error); display:block; }
+  .msg.warning{ background:#FBF3E2; color:#8A6A1F; display:block; }
+  .msg.success{ background:#E9F0E5; color:#3D5E33; display:block; }
+
+  .btn-primary{
+    background:var(--walnut); color:var(--paper); border:none; border-radius:var(--radius);
+    padding:14px 22px; font-weight:600; font-size:14.5px; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .btn-primary:hover{ background:#5a3620; }
+  .btn-primary:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .gate, .loading-state{ text-align:center; padding:80px 0; }
+  .gate p, .loading-state p{ color:var(--ink-soft); margin-bottom:24px; }
+  .gate a{
+    display:inline-block; background:var(--walnut); color:var(--paper); text-decoration:none;
+    padding:12px 24px; border-radius:var(--radius); font-weight:600; font-size:14.5px;
+  }
+
+  #bookingApp, #gateView, #confirmView, #incompleteView{ display:none; }
+  #bookingApp.active, #gateView.active, #confirmView.active, #incompleteView.active{ display:block; }
+
+  .confirm-card{ text-align:center; padding:20px 0 4px; }
+  .confirm-badge{
+    display:inline-block; background:var(--paper-warm); color:#8A6A1F;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:5px 12px; border-radius:var(--radius); margin-bottom:16px;
+  }
+  .confirm-id{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-soft); margin-bottom:22px; }
+  .confirm-grid{ text-align:left; display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; margin-top:20px; }
+  .confirm-grid .cf-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:3px;
+  }
+  .confirm-grid .cf-value{ font-size:15px; font-weight:600; }
+
+  @media (max-width:600px){
+    .row{ flex-direction:column; }
+    .profile-grid{ grid-template-columns:1fr; }
+    .confirm-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="index.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
+        <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
+        <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
+      </svg>
+      Lakewood Estate
+    </a>
+    <a href="index.html" class="back-link">← Back to home</a>
+  </nav>
+</header>
+
+<div id="gateView" class="wrap gate">
+  <h1>Sign in to book the hall</h1>
+  <p>You need a resident account to reserve the community hall.</p>
+  <a href="login.html">Go to sign in</a>
+</div>
+
+<div id="incompleteView" class="wrap gate">
+  <h1>Your profile is incomplete</h1>
+  <p id="incompleteMsg">Some required details are missing from your account, so we can't pre-fill your booking.</p>
+  <a href="login.html">Complete your profile</a>
+</div>
+
+<div id="bookingApp">
+  <main class="wrap">
+    <h1>Book Community Hall</h1>
+    <p class="sub">Reserve the community hall quickly and conveniently for your upcoming event.</p>
+
+    <div class="panel">
+      <h2>Your details</h2>
+      <div class="profile-grid">
+        <div class="profile-field"><div class="label">Name</div><div class="value" id="pfName">—</div></div>
+        <div class="profile-field"><div class="label">Phone</div><div class="value" id="pfPhone">—</div></div>
+        <div class="profile-field"><div class="label">Email</div><div class="value" id="pfEmail">—</div></div>
+        <div class="profile-field"><div class="label">Flat</div><div class="value" id="pfFlat">—</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Date &amp; time</h2>
+      <form id="bookingForm">
+        <div>
+          <label for="bDate">Booking date</label>
+          <input type="date" id="bDate" required />
+        </div>
+        <div class="row">
+          <div>
+            <label for="bStart">Start time</label>
+            <input type="time" id="bStart" required />
+          </div>
+          <div>
+            <label for="bEnd">End time</label>
+            <input type="time" id="bEnd" required />
+          </div>
+        </div>
+
+        <div>
+          <label>Availability for selected date</label>
+          <div class="timeline-scroll">
+            <div class="timeline-wrap">
+              <div class="timeline-track-bg"></div>
+              <div id="timelineTrack" style="position:relative; height:52px;"></div>
+              <div class="timeline-labels" id="timelineLabels"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="i-green"></i>Available</span>
+            <span><i class="i-yellow"></i>Payment pending</span>
+            <span><i class="i-red"></i>Booked &amp; paid</span>
+          </div>
+        </div>
+
+        <div class="fee-box">
+          <div>
+            <div class="fee-label">Total fee</div>
+            <div class="fee-detail" id="feeDetail">Select a start and end time</div>
+          </div>
+          <div class="fee-amount" id="feeAmount">₹0</div>
+        </div>
+
+        <div class="msg" id="msgBox"></div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">Submit booking</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<div id="confirmView">
+  <main class="wrap">
+    <div class="panel confirm-card">
+      <span class="confirm-badge">Payment pending</span>
+      <h1>Booking confirmed</h1>
+      <div class="confirm-id" id="cfBookingId"></div>
+      <div class="confirm-grid">
+        <div><div class="cf-label">Name</div><div class="cf-value" id="cfName"></div></div>
+        <div><div class="cf-label">Flat</div><div class="cf-value" id="cfFlat"></div></div>
+        <div><div class="cf-label">Date</div><div class="cf-value" id="cfDate"></div></div>
+        <div><div class="cf-label">Time</div><div class="cf-value" id="cfTime"></div></div>
+        <div><div class="cf-label">Duration</div><div class="cf-value" id="cfDuration"></div></div>
+        <div><div class="cf-label">Billable hours</div><div class="cf-value" id="cfBillable"></div></div>
+        <div><div class="cf-label">Total fee</div><div class="cf-value" id="cfFee"></div></div>
+        <div><div class="cf-label">Payment status</div><div class="cf-value" id="cfPaid"></div></div>
+      </div>
+      <div style="margin-top:28px;">
+        <a href="index.html" class="back-link">← Back to home</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
+    authDomain: "lakewood-estate.firebaseapp.com",
+    projectId: "lakewood-estate",
+    storageBucket: "lakewood-estate.firebasestorage.app",
+    messagingSenderId: "730103645174",
+    appId: "1:730103645174:web:c8af4a01c36bd53df9bdd7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const RATE_PER_HOUR = 1500;
+  const HALL_OPEN_MIN = 8 * 60;   // 08:00
+  const HALL_CLOSE_MIN = 23 * 60; // 23:00
+  const SPAN_MIN = HALL_CLOSE_MIN - HALL_OPEN_MIN;
+
+  const gateView = document.getElementById('gateView');
+  const incompleteView = document.getElementById('incompleteView');
+  const bookingApp = document.getElementById('bookingApp');
+  const confirmView = document.getElementById('confirmView');
+  const msgBox = document.getElementById('msgBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  let profile = null; // { name, phone, email, flat }
+  let currentUser = null;
+  let dayBookings = []; // bookings for the currently selected date
+  let hasBlockingConflict = false;
+
+  function showOnly(el){
+    [gateView, incompleteView, bookingApp, confirmView].forEach(v => v.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function showMessage(text, type){ msgBox.textContent = text; msgBox.className = 'msg ' + type; }
+  function clearMessage(){ msgBox.className = 'msg'; msgBox.textContent = ''; }
+
+  function timeToMinutes(t){
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+  function minutesToLabel(mins){
+    const h = Math.floor(mins / 60), m = mins % 60;
+    const period = h >= 12 ? 'PM' : 'AM';
+    let h12 = h % 12; if(h12 === 0) h12 = 12;
+    return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+  }
+
+  // ---- Auth + profile gate ----
+  auth.onAuthStateChanged(async (user) => {
+    if(!user){ showOnly(gateView); return; }
+    currentUser = user;
+    try {
+      const doc = await db.collection('residents').doc(user.uid).get();
+      if(!doc.exists){ showOnly(incompleteView); return; }
+      const d = doc.data();
+      const missing = [];
+      if(!d.name) missing.push('name');
+      if(!d.mobile) missing.push('phone number');
+      if(!d.tower || !d.floor || !d.flat) missing.push('flat details');
+      if(missing.length){
+        document.getElementById('incompleteMsg').textContent =
+          `Missing from your profile: ${missing.join(', ')}. Please complete your profile to book.`;
+        showOnly(incompleteView);
+        return;
+      }
+      profile = {
+        name: d.name,
+        phone: d.mobile,
+        email: d.email || user.email,
+        flat: `Tower${d.tower}/${d.floor}${d.flat}`
+      };
+      document.getElementById('pfName').textContent = profile.name;
+      document.getElementById('pfPhone').textContent = profile.phone;
+      document.getElementById('pfEmail').textContent = profile.email;
+      document.getElementById('pfFlat').textContent = profile.flat;
+      initForm();
+      showOnly(bookingApp);
+    } catch (err) {
+      showOnly(incompleteView);
+      document.getElementById('incompleteMsg').textContent = 'Couldn\u2019t load your profile: ' + err.message;
+    }
+  });
+
+  // ---- Date limits + form init ----
+  function initForm(){
+    const dateInput = document.getElementById('bDate');
+    const today = new Date();
+    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 1);
+    dateInput.min = today.toISOString().slice(0,10);
+    dateInput.max = maxDate.toISOString().slice(0,10);
+    dateInput.value = today.toISOString().slice(0,10);
+
+    dateInput.addEventListener('change', onDateChange);
+    document.getElementById('bStart').addEventListener('input', recalc);
+    document.getElementById('bEnd').addEventListener('input', recalc);
+    document.getElementById('bookingForm').addEventListener('submit', onSubmit);
+
+    renderHourLabels();
+    onDateChange();
+  }
+
+  function renderHourLabels(){
+    const labels = document.getElementById('timelineLabels');
+    labels.innerHTML = '';
+    for(let m = HALL_OPEN_MIN; m <= HALL_CLOSE_MIN; m += 60){
+      const span = document.createElement('span');
+      span.textContent = minutesToLabel(m).replace(':00','');
+      labels.appendChild(span);
+    }
+  }
+
+  async function onDateChange(){
+    clearMessage();
+    const dateVal = document.getElementById('bDate').value;
+    const track = document.getElementById('timelineTrack');
+    track.innerHTML = '<div style="padding:16px; font-size:13px; color:var(--ink-soft);">Loading availability…</div>';
+    try {
+      const snapshot = await db.collection('hallBookings').where('bookingDate', '==', dateVal).get();
+      dayBookings = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTimeline();
+      recalc();
+    } catch (err) {
+      track.innerHTML = `<div style="padding:16px; font-size:13px; color:var(--error);">Couldn\u2019t load availability: ${err.message}</div>`;
+    }
+  }
+
+  function renderTimeline(){
+    const track = document.getElementById('timelineTrack');
+    track.innerHTML = '';
+    dayBookings.forEach(b => {
+      const left = Math.max(0, (b.startMinutes - HALL_OPEN_MIN) / SPAN_MIN * 100);
+      const width = Math.min(100 - left, (b.endMinutes - b.startMinutes) / SPAN_MIN * 100);
+      if(width <= 0) return;
+      const seg = document.createElement('div');
+      seg.className = 'timeline-segment ' + (b.paid ? 'seg-red' : 'seg-yellow');
+      seg.style.left = left + '%';
+      seg.style.width = width + '%';
+      seg.textContent = `${b.startTime}–${b.endTime}`;
+      track.appendChild(seg);
+    });
+  }
+
+  // ---- Fee calc + conflict pre-check ----
+  function recalc(){
+    clearMessage();
+    hasBlockingConflict = false;
+    const startVal = document.getElementById('bStart').value;
+    const endVal = document.getElementById('bEnd').value;
+    const feeAmount = document.getElementById('feeAmount');
+    const feeDetail = document.getElementById('feeDetail');
+
+    if(!startVal || !endVal){
+      feeAmount.textContent = '₹0';
+      feeDetail.textContent = 'Select a start and end time';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    const startMin = timeToMinutes(startVal);
+    const endMin = timeToMinutes(endVal);
+
+    if(endMin <= startMin){
+      feeAmount.textContent = '₹0';
+      feeDetail.textContent = 'End time must be after start time';
+      showMessage('End time must be later than the start time.', 'error');
+      submitBtn.disabled = true;
+      return;
+    }
+
+    const durationHours = (endMin - startMin) / 60;
+    const billableHours = Math.ceil(durationHours);
+    const totalFee = billableHours * RATE_PER_HOUR;
+
+    const h = Math.floor(durationHours);
+    const m = Math.round((durationHours - h) * 60);
+    feeDetail.textContent = `Duration: ${h}h ${m ? m + 'm' : ''} · Billable hours: ${billableHours}`;
+    feeAmount.textContent = '₹' + totalFee.toLocaleString('en-IN');
+
+    // Client-side conflict pre-check (final authority is the backend transaction on submit)
+    const overlapping = dayBookings.filter(b => startMin < b.endMinutes && endMin > b.startMinutes);
+    const paidConflict = overlapping.find(b => b.paid);
+    const unpaidConflict = overlapping.find(b => !b.paid);
+
+    if(paidConflict){
+      showMessage(`This time slot is unavailable because the hall is already booked from ${paidConflict.startTime} to ${paidConflict.endTime}. Please select another time.`, 'error');
+      hasBlockingConflict = true;
+      submitBtn.disabled = true;
+    } else if(unpaidConflict){
+      showMessage(`This time slot currently has a pending booking (${unpaidConflict.startTime}–${unpaidConflict.endTime}). You may continue, but that booking hasn't been marked as paid yet.`, 'warning');
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = false;
+    }
+  }
+
+  // ---- Submit: authoritative transaction-based conflict check ----
+  async function onSubmit(e){
+    e.preventDefault();
+    if(hasBlockingConflict) return;
+    clearMessage();
+
+    const dateVal = document.getElementById('bDate').value;
+    const startVal = document.getElementById('bStart').value;
+    const endVal = document.getElementById('bEnd').value;
+    const startMin = timeToMinutes(startVal);
+    const endMin = timeToMinutes(endVal);
+
+    if(endMin <= startMin){
+      showMessage('End time must be later than the start time.', 'error');
+      return;
+    }
+
+    const durationHours = (endMin - startMin) / 60;
+    const billableHours = Math.ceil(durationHours);
+    const totalFee = billableHours * RATE_PER_HOUR;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    const newBookingRef = db.collection('hallBookings').doc();
+
+    try {
+      await db.runTransaction(async (transaction) => {
+        // Re-check for real, inside the transaction, against a fresh read —
+        // this is what actually prevents two people double-booking a paid slot.
+        const query = db.collection('hallBookings').where('bookingDate', '==', dateVal);
+        const snapshot = await transaction.get(query);
+
+        const conflict = snapshot.docs.find(doc => {
+          const b = doc.data();
+          return b.paid && startMin < b.endMinutes && endMin > b.startMinutes;
+        });
+        if(conflict){
+          const b = conflict.data();
+          throw new Error(`CONFLICT:${b.startTime}-${b.endTime}`);
+        }
+
+        transaction.set(newBookingRef, {
+          userId: currentUser.uid,
+          name: profile.name,
+          phone: profile.phone,
+          email: profile.email,
+          flat: profile.flat,
+          bookingDate: dateVal,
+          startTime: startVal,
+          endTime: endVal,
+          startMinutes: startMin,
+          endMinutes: endMin,
+          duration: durationHours,
+          billableHours: billableHours,
+          totalFee: totalFee,
+          paid: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+
+      // Success — show confirmation
+      document.getElementById('cfBookingId').textContent = 'Booking ID: ' + newBookingRef.id;
+      document.getElementById('cfName').textContent = profile.name;
+      document.getElementById('cfFlat').textContent = profile.flat;
+      document.getElementById('cfDate').textContent = new Date(dateVal + 'T00:00:00').toLocaleDateString(undefined, { day:'numeric', month:'long', year:'numeric' });
+      document.getElementById('cfTime').textContent = `${minutesToLabel(startMin)} – ${minutesToLabel(endMin)}`;
+      const h = Math.floor(durationHours), m = Math.round((durationHours - h) * 60);
+      document.getElementById('cfDuration').textContent = `${h}h ${m ? m + 'm' : ''}`;
+      document.getElementById('cfBillable').textContent = billableHours;
+      document.getElementById('cfFee').textContent = '₹' + totalFee.toLocaleString('en-IN');
+      document.getElementById('cfPaid').textContent = 'Payment Pending';
+      showOnly(confirmView);
+
+    } catch (err) {
+      if(String(err.message).startsWith('CONFLICT:')){
+        const [s, eT] = err.message.replace('CONFLICT:', '').split('-');
+        showMessage(`This time slot was just booked by someone else, from ${s} to ${eT}. Please choose another time.`, 'error');
+        onDateChange(); // refresh availability
+      } else {
+        showMessage('Something went wrong submitting your booking: ' + err.message, 'error');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit booking';
+    }
+  }
+</script>
+
+</body>
+</html>
