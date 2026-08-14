@@ -60,10 +60,11 @@
   }
   .divider::before, .divider::after{ content:''; flex:1; height:1px; background:rgba(22,33,29,0.14); }
 
-  form{ display:flex; flex-direction:column; gap:14px; }
+  form{ display:flex; flex-direction:column; gap:16px; }
+  form > div, .row > div{ display:flex; flex-direction:column; gap:6px; }
   .row{ display:flex; gap:12px; }
   .row > div{ flex:1; min-width:0; }
-  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:-6px; display:block; }
+  label{ font-size:13px; font-weight:600; color:var(--ink); margin:0; display:block; }
   input, select{
     width:100%; padding:12px 13px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
     font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper); color:var(--ink);
