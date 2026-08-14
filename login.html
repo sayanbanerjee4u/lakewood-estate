@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in — Lakewood Estate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lake-deep:#0F3A3A; --lake-mid:#1E5F57; --moss:#7C9473;
+    --walnut:#6B4226; --paper:#EEF0E6; --paper-warm:#E4E6D8;
+    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E; --error:#A6402F;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif;
+    padding:24px;
+  }
+  a{color:inherit;}
+  .card{
+    width:100%; max-width:400px; background:#fff;
+    border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius);
+    padding:40px 34px 34px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
+    font-family:'Fraunces',serif; font-size:17px; font-weight:600; margin-bottom:28px;
+  }
+  .brand-mark{ width:24px; height:24px; flex-shrink:0; }
+  h1{
+    font-family:'Fraunces',serif; font-weight:500; font-size:26px; margin:0 0 6px; line-height:1.15;
+  }
+  .sub{ font-size:14.5px; color:var(--ink-soft); margin:0 0 26px; line-height:1.5; }
+
+  .oauth-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:12px 16px; border-radius:var(--radius); border:1px solid rgba(22,33,29,0.18);
+    background:#fff; color:var(--ink); font-size:14.5px; font-weight:600;
+    cursor:pointer; margin-bottom:10px; font-family:'Inter',sans-serif;
+  }
+  .oauth-btn:hover{ background:var(--paper-warm); }
+  .oauth-btn:disabled{ opacity:0.45; cursor:not-allowed; }
+  .oauth-btn:disabled:hover{ background:#fff; }
+  .oauth-btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .badge-soon{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+    background:var(--paper-warm); color:var(--ink-soft); padding:2px 7px; border-radius:var(--radius); margin-left:2px;
+  }
+
+  .divider{
+    display:flex; align-items:center; gap:12px; margin:22px 0;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  .divider::before, .divider::after{ content:''; flex:1; height:1px; background:rgba(22,33,29,0.14); }
+
+  form{ display:flex; flex-direction:column; gap:14px; }
+  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:-6px; }
+  input{
+    width:100%; padding:12px 13px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
+    font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper);
+  }
+  input:focus-visible{ outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass); }
+
+  .btn-primary{
+    background:var(--walnut); color:var(--paper); border:none; border-radius:var(--radius);
+    padding:13px 16px; font-weight:600; font-size:14.5px; cursor:pointer; margin-top:4px;
+    font-family:'Inter',sans-serif;
+  }
+  .btn-primary:hover{ background:#5a3620; }
+  .btn-primary:disabled{ opacity:0.6; cursor:wait; }
+
+  .msg{
+    font-size:13.5px; padding:10px 12px; border-radius:var(--radius); display:none; line-height:1.5;
+  }
+  .msg.error{ background:#FBEAE6; color:var(--error); display:block; }
+  .msg.success{ background:#E9F0E5; color:#3D5E33; display:block; }
+
+  .switch-mode{
+    text-align:center; margin-top:22px; font-size:14px; color:var(--ink-soft);
+  }
+  .switch-mode button{
+    background:none; border:none; color:var(--lake-mid); font-weight:600; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:14px; padding:0; text-decoration:underline;
+  }
+  .back-link{
+    display:block; text-align:center; margin-top:18px; font-size:13px; color:var(--ink-soft); text-decoration:none;
+  }
+  .back-link:hover{ color:var(--ink); }
+
+  .signed-in-panel{ display:none; text-align:center; }
+  .signed-in-panel.active{ display:block; }
+  .avatar{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 16px; display:block; background:var(--paper-warm);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a href="index.html" class="brand">
+    <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+      <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
+      <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
+      <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
+    </svg>
+    Lakewood Estate
+  </a>
+
+  <!-- SIGNED OUT: sign-in / register form -->
+  <div id="authPanel">
+    <h1 id="formTitle">Welcome back</h1>
+    <p class="sub" id="formSub">Sign in to access resident services and forms.</p>
+
+    <button class="oauth-btn" id="googleBtn">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.7 0-14.4 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.8 14.3-5l-6.6-5.6c-2.1 1.5-4.8 2.5-7.7 2.5-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.6 5.6C40.9 36.5 45 31 45 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <button class="oauth-btn" disabled>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.462 2.27-1.19 3.087-.77.87-2.03 1.53-3.06 1.45-.13-1.11.44-2.28 1.15-3.05.78-.87 2.16-1.54 3.1-1.487zM20.66 17.36c-.53 1.22-.78 1.76-1.46 2.83-.95 1.5-2.29 3.37-3.95 3.39-1.47.02-1.85-.95-3.85-.94-2 .01-2.42.96-3.9.94-1.66-.02-2.92-1.7-3.87-3.2-2.66-4.17-2.94-9.06-1.3-11.66 1.16-1.85 3-2.93 4.72-2.93 1.76 0 2.86 1 4.32 1 1.4 0 2.27-1 4.31-1 1.55 0 3.19.85 4.36 2.31-3.83 2.1-3.21 7.57.62 9.26z"/></svg>
+      Continue with Apple <span class="badge-soon">Coming soon</span>
+    </button>
+
+    <div class="divider">or</div>
+
+    <div id="msgBox" class="msg"></div>
+
+    <form id="emailForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="email" required placeholder="you@example.com" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" autocomplete="current-password" required placeholder="At least 6 characters" minlength="6" />
+
+      <button type="submit" class="btn-primary" id="submitBtn">Sign in</button>
+    </form>
+
+    <div class="switch-mode">
+      <span id="switchText">Don't have an account?</span>
+      <button type="button" id="switchBtn">Create one</button>
+    </div>
+  </div>
+
+  <!-- SIGNED IN: confirmation panel -->
+  <div class="signed-in-panel" id="signedInPanel">
+    <h1>You're signed in</h1>
+    <p class="sub" id="whoText"></p>
+    <button class="btn-primary" id="signOutBtn" style="width:100%;">Sign out</button>
+  </div>
+
+  <a href="index.html" class="back-link">← Back to home</a>
+</div>
+
+<!-- Firebase SDKs (compat build — plain script tags, no build step needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script>
+  /* =====================================================================
+     PASTE YOUR FIREBASE CONFIG HERE
+     (From Firebase Console → Project settings → your web app → SDK setup)
+     ===================================================================== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
+    authDomain: "lakewood-estate.firebaseapp.com",
+    projectId: "lakewood-estate",
+    storageBucket: "lakewood-estate.firebasestorage.app",
+    messagingSenderId: "730103645174",
+    appId: "1:730103645174:web:c8af4a01c36bd53df9bdd7"
+  };
+  /* ===================================================================== */
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // ---- DOM refs ----
+  const authPanel = document.getElementById('authPanel');
+  const signedInPanel = document.getElementById('signedInPanel');
+  const formTitle = document.getElementById('formTitle');
+  const formSub = document.getElementById('formSub');
+  const submitBtn = document.getElementById('submitBtn');
+  const switchText = document.getElementById('switchText');
+  const switchBtn = document.getElementById('switchBtn');
+  const msgBox = document.getElementById('msgBox');
+  const emailForm = document.getElementById('emailForm');
+  const whoText = document.getElementById('whoText');
+
+  let mode = 'signin'; // or 'register'
+
+  function showMessage(text, type){
+    msgBox.textContent = text;
+    msgBox.className = 'msg ' + type;
+  }
+  function clearMessage(){
+    msgBox.className = 'msg';
+    msgBox.textContent = '';
+  }
+
+  switchBtn.addEventListener('click', () => {
+    mode = mode === 'signin' ? 'register' : 'signin';
+    clearMessage();
+    if(mode === 'register'){
+      formTitle.textContent = 'Create your account';
+      formSub.textContent = 'Register with your email to access resident services.';
+      submitBtn.textContent = 'Create account';
+      switchText.textContent = 'Already have an account?';
+      switchBtn.textContent = 'Sign in';
+    } else {
+      formTitle.textContent = 'Welcome back';
+      formSub.textContent = 'Sign in to access resident services and forms.';
+      submitBtn.textContent = 'Sign in';
+      switchText.textContent = "Don't have an account?";
+      switchBtn.textContent = 'Create one';
+    }
+  });
+
+  emailForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessage();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    submitBtn.disabled = true;
+    submitBtn.textContent = mode === 'register' ? 'Creating account…' : 'Signing in…';
+
+    try {
+      if(mode === 'register'){
+        await auth.createUserWithEmailAndPassword(email, password);
+      } else {
+        await auth.signInWithEmailAndPassword(email, password);
+      }
+      // onAuthStateChanged below handles the redirect/UI update
+    } catch (err) {
+      showMessage(friendlyError(err.code), 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = mode === 'register' ? 'Create account' : 'Sign in';
+    }
+  });
+
+  document.getElementById('googleBtn').addEventListener('click', async () => {
+    clearMessage();
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      await auth.signInWithPopup(provider);
+    } catch (err) {
+      showMessage(friendlyError(err.code), 'error');
+    }
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      authPanel.style.display = 'none';
+      signedInPanel.classList.add('active');
+      whoText.textContent = `Signed in as ${user.email || user.displayName || 'resident'}.`;
+    } else {
+      authPanel.style.display = 'block';
+      signedInPanel.classList.remove('active');
+      submitBtn.disabled = false;
+      submitBtn.textContent = mode === 'register' ? 'Create account' : 'Sign in';
+    }
+  });
+
+  function friendlyError(code){
+    const map = {
+      'auth/invalid-email': 'That email address doesn\u2019t look right.',
+      'auth/user-not-found': 'No account found with that email. Try creating one instead.',
+      'auth/wrong-password': 'Incorrect password. Please try again.',
+      'auth/email-already-in-use': 'An account already exists with that email. Try signing in instead.',
+      'auth/weak-password': 'Password should be at least 6 characters.',
+      'auth/popup-closed-by-user': 'Sign-in was cancelled.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Site isn\u2019t connected to Firebase yet \u2014 paste your config keys into login.html.'
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+  }
+</script>
+
+</body>
+</html>
