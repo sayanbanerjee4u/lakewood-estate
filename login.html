@@ -118,8 +118,8 @@
   .signed-in-panel{ display:none; text-align:center; }
   .signed-in-panel.active{ display:block; }
 
-  #signInView, #registerView{ display:none; }
-  #signInView.active, #registerView.active{ display:block; }
+  #signInView, #registerView, #completeProfileView{ display:none; }
+  #signInView.active, #registerView.active, #completeProfileView.active{ display:block; }
 
   @media (max-width:480px){
     .row{ flex-direction:column; }
@@ -281,6 +281,91 @@
     </div>
   </div>
 
+  <!-- ============ COMPLETE PROFILE VIEW (first-time Google sign-in) ============ -->
+  <div id="completeProfileView">
+    <h1>One more step</h1>
+    <p class="sub">You're signed in with Google — just need your flat details so the committee can verify you.</p>
+
+    <form id="completeProfileForm">
+      <div>
+        <label for="cpName">Full name</label>
+        <input type="text" id="cpName" required placeholder="As per society records" />
+      </div>
+
+      <fieldset>
+        <legend>Occupant type</legend>
+        <div class="pill-group">
+          <input type="radio" name="cpOccupantType" id="cpOccOwner" value="Owner" checked>
+          <label for="cpOccOwner">Owner</label>
+          <input type="radio" name="cpOccupantType" id="cpOccTenant" value="Tenant">
+          <label for="cpOccTenant">Tenant</label>
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="cpMobile">Mobile number</label>
+        <input type="tel" id="cpMobile" required placeholder="10-digit number" pattern="[0-9]{10}" maxlength="10" />
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Flat details</div>
+        <div class="row">
+          <div>
+            <label for="cpTower">Tower</label>
+            <select id="cpTower" required>
+              <option value="">Select</option>
+              <option value="1">Tower 1</option>
+              <option value="2">Tower 2</option>
+              <option value="3">Tower 3</option>
+              <option value="4">Tower 4</option>
+              <option value="5">Tower 5</option>
+              <option value="6">Tower 6</option>
+            </select>
+          </div>
+          <div>
+            <label for="cpFloor">Floor</label>
+            <select id="cpFloor" required disabled>
+              <option value="">Select tower first</option>
+            </select>
+          </div>
+          <div>
+            <label for="cpFlat">Flat</label>
+            <select id="cpFlat" required disabled>
+              <option value="">Select tower first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Parking</div>
+        <fieldset>
+          <legend>Parking type</legend>
+          <div class="pill-group">
+            <input type="radio" name="cpParkingType" id="cpPkOpen" value="Open" checked>
+            <label for="cpPkOpen">Open</label>
+            <input type="radio" name="cpParkingType" id="cpPkCovered" value="Covered">
+            <label for="cpPkCovered">Covered</label>
+            <input type="radio" name="cpParkingType" id="cpPkBasement" value="Basement">
+            <label for="cpPkBasement">Basement</label>
+          </div>
+        </fieldset>
+        <div class="row" style="margin-top:14px;">
+          <div>
+            <label for="cpParkingNumber">Parking number</label>
+            <input type="text" id="cpParkingNumber" placeholder="e.g. B-24" />
+          </div>
+          <div>
+            <label for="cpVehicleNumber">Vehicle number</label>
+            <input type="text" id="cpVehicleNumber" placeholder="e.g. WB 06 AB 1234" />
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="completeProfileBtn">Save details</button>
+    </form>
+  </div>
+
   <!-- ============ SIGNED IN VIEW ============ -->
   <div class="signed-in-panel" id="signedInPanel">
     <h1>You're signed in</h1>
@@ -311,16 +396,19 @@
   const card = document.getElementById('card');
   const signInView = document.getElementById('signInView');
   const registerView = document.getElementById('registerView');
+  const completeProfileView = document.getElementById('completeProfileView');
   const signedInPanel = document.getElementById('signedInPanel');
   const msgBox = document.getElementById('msgBox');
 
   function showView(view){
     signInView.classList.remove('active');
     registerView.classList.remove('active');
+    completeProfileView.classList.remove('active');
     signedInPanel.classList.remove('active');
     clearMessage();
     if(view === 'signin'){ signInView.classList.add('active'); card.classList.remove('wide'); }
     if(view === 'register'){ registerView.classList.add('active'); card.classList.add('wide'); }
+    if(view === 'completeProfile'){ completeProfileView.classList.add('active'); card.classList.add('wide'); }
     if(view === 'signedin'){ signedInPanel.classList.add('active'); card.classList.remove('wide'); }
   }
   document.getElementById('toRegisterBtn').addEventListener('click', () => showView('register'));
@@ -329,60 +417,86 @@
   function showMessage(text, type){ msgBox.textContent = text; msgBox.className = 'msg ' + type; }
   function clearMessage(){ msgBox.className = 'msg'; msgBox.textContent = ''; }
 
-  // ---- Tower → Floor / Flat dependent selects ----
-  const towerSelect = document.getElementById('rTower');
-  const floorSelect = document.getElementById('rFloor');
-  const flatSelect = document.getElementById('rFlat');
+  // When true, an explicit action (sign-in/register/google click) is already
+  // deciding the view — the background auth listener should stand down.
+  let handlingAuthAction = false;
 
+  async function decideView(user){
+    const doc = await db.collection('residents').doc(user.uid).get();
+    if(doc.exists){
+      showView('signedin');
+      document.getElementById('whoText').textContent = `Signed in as ${doc.data().name || user.displayName || user.email}.`;
+    } else {
+      showView('completeProfile');
+      document.getElementById('cpName').value = user.displayName || '';
+    }
+  }
+
+  // ---- Tower → Floor / Flat dependent selects (shared by register + complete-profile forms) ----
   function fillOptions(select, values, placeholder){
     select.innerHTML = `<option value="">${placeholder}</option>` +
       values.map(v => `<option value="${v}">${v}</option>`).join('');
   }
 
-  towerSelect.addEventListener('change', () => {
-    const tower = towerSelect.value;
-    if(!tower){
-      floorSelect.disabled = true; flatSelect.disabled = true;
-      fillOptions(floorSelect, [], 'Select tower first');
-      fillOptions(flatSelect, [], 'Select tower first');
-      return;
-    }
-    const isSmallTower = (tower === '1' || tower === '2');
-    const floorCount = isSmallTower ? 12 : 18;
-    const floors = Array.from({length: floorCount}, (_, i) => i + 1);
-    const flats = isSmallTower ? ['A','B','C','D'] : ['A','B','C','D','E'];
+  function wireTowerDependents(towerSelect, floorSelect, flatSelect){
+    towerSelect.addEventListener('change', () => {
+      const tower = towerSelect.value;
+      if(!tower){
+        floorSelect.disabled = true; flatSelect.disabled = true;
+        fillOptions(floorSelect, [], 'Select tower first');
+        fillOptions(flatSelect, [], 'Select tower first');
+        return;
+      }
+      const isSmallTower = (tower === '1' || tower === '2');
+      const floorCount = isSmallTower ? 12 : 18;
+      const floors = Array.from({length: floorCount}, (_, i) => i + 1);
+      const flats = isSmallTower ? ['A','B','C','D'] : ['A','B','C','D','E'];
 
-    fillOptions(floorSelect, floors, 'Select floor');
-    fillOptions(flatSelect, flats, 'Select flat');
-    floorSelect.disabled = false;
-    flatSelect.disabled = false;
-  });
+      fillOptions(floorSelect, floors, 'Select floor');
+      fillOptions(flatSelect, flats, 'Select flat');
+      floorSelect.disabled = false;
+      flatSelect.disabled = false;
+    });
+  }
+
+  wireTowerDependents(
+    document.getElementById('rTower'), document.getElementById('rFloor'), document.getElementById('rFlat')
+  );
+  wireTowerDependents(
+    document.getElementById('cpTower'), document.getElementById('cpFloor'), document.getElementById('cpFlat')
+  );
 
   // ---- Sign in ----
   document.getElementById('signInForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMessage();
+    handlingAuthAction = true;
     const btn = document.getElementById('signInBtn');
     btn.disabled = true; btn.textContent = 'Signing in…';
     try {
-      await auth.signInWithEmailAndPassword(
+      const cred = await auth.signInWithEmailAndPassword(
         document.getElementById('siEmail').value.trim(),
         document.getElementById('siPassword').value
       );
+      await decideView(cred.user);
     } catch (err) {
       showMessage(friendlyError(err.code), 'error');
     }
     btn.disabled = false; btn.textContent = 'Sign in';
+    handlingAuthAction = false;
   });
 
   // ---- Google sign in ----
   document.getElementById('googleBtn').addEventListener('click', async () => {
     clearMessage();
+    handlingAuthAction = true;
     try {
-      await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      await decideView(result.user);
     } catch (err) {
       showMessage(friendlyError(err.code), 'error');
     }
+    handlingAuthAction = false;
   });
 
   // ---- Register ----
@@ -414,6 +528,7 @@
 
     const btn = document.getElementById('registerBtn');
     btn.disabled = true; btn.textContent = 'Creating account…';
+    handlingAuthAction = true;
 
     try {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
@@ -424,18 +539,67 @@
         parkingType, parkingNumber, vehicleNumber,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+      showView('signedin');
+      document.getElementById('whoText').textContent = `Signed in as ${name}.`;
     } catch (err) {
       showMessage(friendlyError(err.code), 'error');
       btn.disabled = false; btn.textContent = 'Create account';
     }
+    handlingAuthAction = false;
+  });
+
+  // ---- Complete profile (first-time Google sign-in) ----
+  document.getElementById('completeProfileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessage();
+
+    const user = auth.currentUser;
+    if(!user){ showMessage('Session expired — please sign in again.', 'error'); showView('signin'); return; }
+
+    const name = document.getElementById('cpName').value.trim();
+    const occupantType = document.querySelector('input[name=cpOccupantType]:checked').value;
+    const mobile = document.getElementById('cpMobile').value.trim();
+    const tower = document.getElementById('cpTower').value;
+    const floor = document.getElementById('cpFloor').value;
+    const flat = document.getElementById('cpFlat').value;
+    const parkingType = document.querySelector('input[name=cpParkingType]:checked').value;
+    const parkingNumber = document.getElementById('cpParkingNumber').value.trim();
+    const vehicleNumber = document.getElementById('cpVehicleNumber').value.trim();
+
+    if(!tower || !floor || !flat){
+      showMessage('Please select tower, floor and flat.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('completeProfileBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    handlingAuthAction = true;
+
+    try {
+      if(name && name !== user.displayName){
+        await user.updateProfile({ displayName: name });
+      }
+      await db.collection('residents').doc(user.uid).set({
+        name, occupantType, email: user.email, mobile,
+        tower, floor, flat,
+        parkingType, parkingNumber, vehicleNumber,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showView('signedin');
+      document.getElementById('whoText').textContent = `Signed in as ${name}.`;
+    } catch (err) {
+      showMessage('Something went wrong saving your details: ' + err.message, 'error');
+      btn.disabled = false; btn.textContent = 'Save details';
+    }
+    handlingAuthAction = false;
   });
 
   document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
 
   auth.onAuthStateChanged((user) => {
+    if(handlingAuthAction) return; // an explicit handler is already deciding the view
     if(user){
-      showView('signedin');
-      document.getElementById('whoText').textContent = `Signed in as ${user.displayName || user.email}.`;
+      decideView(user);
     } else {
       showView('signin');
     }
