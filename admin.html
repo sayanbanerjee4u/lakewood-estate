@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Announcements dashboard — Lakewood Estate</title>
+<title>Dashboard — Lakewood Estate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -11,8 +11,7 @@
   :root{
     --lake-deep:#0F3A3A; --lake-mid:#1E5F57; --moss:#7C9473;
     --walnut:#6B4226; --paper:#EEF0E6; --paper-warm:#E4E6D8;
-    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E; --error:#A6402F;
-    --live:#3D5E33; --scheduled:#8A6A1F; --expired:#8A8A8A;
+    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E;
     --radius:2px;
   }
   *{box-sizing:border-box;}
@@ -23,9 +22,7 @@
   a{color:inherit;}
   .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
 
-  header{
-    background:#fff; border-bottom:1px solid rgba(22,33,29,0.1);
-  }
+  header{ background:#fff; border-bottom:1px solid rgba(22,33,29,0.1); }
   nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:72px; }
   .brand{
     display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
@@ -44,101 +41,36 @@
   h1{ font-family:'Fraunces',serif; font-weight:500; font-size:28px; margin:0 0 6px; }
   .sub{ font-size:14.5px; color:var(--ink-soft); margin:0 0 32px; }
 
-  .panel{
-    background:#fff; border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius);
-    padding:26px 28px; margin-bottom:32px;
+  .card-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:1px; background:rgba(22,33,29,0.12); border:1px solid rgba(22,33,29,0.12); }
+  .feature-card{
+    background:#fff; padding:26px; text-decoration:none; color:var(--ink);
+    display:flex; flex-direction:column; gap:10px; min-height:140px;
   }
-  .panel h2{ font-family:'Fraunces',serif; font-weight:500; font-size:19px; margin:0 0 18px; }
+  .feature-card:hover{ background:var(--paper-warm); }
+  .feature-card h3{ font-family:'Fraunces',serif; font-weight:500; font-size:19px; margin:0; }
+  .feature-card p{ margin:0; font-size:14px; color:var(--ink-soft); line-height:1.55; }
+  .feature-card .arrow{ margin-top:auto; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--lake-mid); }
 
-  form{ display:flex; flex-direction:column; gap:16px; }
-  .row{ display:flex; gap:14px; }
-  .row > div{ flex:1; min-width:0; }
-  label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px; display:block; }
-  .hint{ font-size:12px; color:var(--ink-soft); margin-top:5px; }
-  input, textarea{
-    width:100%; padding:11px 13px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
-    font-family:'Inter',sans-serif; font-size:14.5px; background:var(--paper); color:var(--ink);
-  }
-  textarea{ resize:vertical; min-height:80px; }
-  input:focus-visible, textarea:focus-visible{ outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass); }
-
-  .form-actions{ display:flex; gap:10px; align-items:center; }
-  fieldset{ border:none; margin:0; padding:0; }
-  legend{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:8px; padding:0; }
-  .pill-group{ display:flex; gap:8px; max-width:280px; }
-  .pill-group input[type=radio]{ position:absolute; opacity:0; width:0; height:0; }
-  .pill-group label{
-    flex:1; text-align:center; padding:10px 8px; border:1px solid rgba(22,33,29,0.2);
-    border-radius:var(--radius); font-size:13.5px; font-weight:600; color:var(--ink-soft);
-    cursor:pointer; margin:0;
-  }
-  .pill-group input[type=radio]:checked + label{
-    background:var(--lake-deep); color:var(--paper); border-color:var(--lake-deep);
-  }
-  .btn-primary{
-    background:var(--walnut); color:var(--paper); border:none; border-radius:var(--radius);
-    padding:12px 22px; font-weight:600; font-size:14.5px; cursor:pointer; font-family:'Inter',sans-serif;
-  }
-  .btn-primary:hover{ background:#5a3620; }
-  .btn-primary:disabled{ opacity:0.6; cursor:wait; }
-  .btn-cancel{
-    background:none; border:none; color:var(--ink-soft); font-size:14px; cursor:pointer;
-    font-family:'Inter',sans-serif; text-decoration:underline;
+  .feature-card.disabled{ cursor:not-allowed; opacity:0.55; background:#fff; }
+  .feature-card.disabled:hover{ background:#fff; }
+  .badge-soon{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+    background:var(--paper-warm); color:var(--ink-soft); padding:2px 8px; border-radius:var(--radius);
+    display:inline-block; width:fit-content;
   }
 
-  .msg{ font-size:13.5px; padding:10px 12px; border-radius:var(--radius); display:none; line-height:1.5; }
-  .msg.error{ background:#FBEAE6; color:var(--error); display:block; }
-  .msg.success{ background:#E9F0E5; color:#3D5E33; display:block; }
-
-  .list-item{
-    display:flex; justify-content:space-between; gap:20px;
-    padding:20px 0; border-top:1px solid rgba(22,33,29,0.1);
-  }
-  .list-item:last-child{ padding-bottom:4px; }
-  .li-main{ flex:1; min-width:0; }
-  .li-title-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
-  .li-title-row h3{ font-family:'Fraunces',serif; font-weight:500; font-size:17px; margin:0; }
-  .status-badge{
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
-    padding:3px 9px; border-radius:var(--radius); color:#fff;
-  }
-  .status-live{ background:var(--live); }
-  .status-scheduled{ background:var(--scheduled); }
-  .status-expired{ background:var(--expired); }
-  .status-hidden{ background:#6B4226; }
-  .li-desc{ font-size:14px; color:var(--ink-soft); line-height:1.55; margin:0 0 8px; max-width:560px; }
-  .li-dates{
-    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); display:flex; gap:18px; flex-wrap:wrap;
-  }
-  .li-actions{ display:flex; gap:8px; flex-shrink:0; align-items:flex-start; }
-  .btn-small{
-    background:none; border:1px solid rgba(22,33,29,0.2); color:var(--ink);
-    border-radius:var(--radius); padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer;
-    font-family:'Inter',sans-serif; white-space:nowrap;
-  }
-  .btn-small:hover{ background:var(--paper-warm); }
-  .btn-small.danger{ color:var(--error); border-color:rgba(166,64,47,0.4); }
-  .btn-small.danger:hover{ background:#FBEAE6; }
-
-  .empty-state{ text-align:center; padding:40px 0; color:var(--ink-soft); font-size:14px; }
-
-  .gate{ text-align:center; padding:80px 0; }
-  .gate h1{ margin-bottom:10px; }
+  .gate{ text-align:center; padding:90px 0; }
   .gate p{ color:var(--ink-soft); margin-bottom:24px; }
-  .gate a{
+  .gate a.btn{
     display:inline-block; background:var(--walnut); color:var(--paper); text-decoration:none;
     padding:12px 24px; border-radius:var(--radius); font-weight:600; font-size:14.5px;
   }
 
-  #app{ display:none; }
-  #app.active{ display:block; }
-  #gateView{ display:none; }
-  #gateView.active{ display:block; }
+  #app, #gateView{ display:none; }
+  #app.active, #gateView.active{ display:block; }
 
   @media (max-width:640px){
-    .row{ flex-direction:column; }
-    .list-item{ flex-direction:column; }
-    .li-actions{ flex-direction:row; }
+    .card-grid{ grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -160,58 +92,39 @@
 
 <div id="gateView" class="wrap gate">
   <h1>Committee access only</h1>
-  <p>Sign in with a committee account to manage announcements.</p>
-  <a href="login.html">Go to sign in</a>
+  <p>Sign in with a committee account to reach the dashboard.</p>
+  <a href="login.html" class="btn">Go to sign in</a>
 </div>
 
 <div id="app">
   <main class="wrap">
-    <h1>Announcements</h1>
-    <p class="sub">Publish updates for the homepage. Leave expiry blank for announcements that stay up until you remove them manually.</p>
+    <h1>Dashboard</h1>
+    <p class="sub">Manage the community site's content from here.</p>
 
-    <div class="panel">
-      <h2 id="formHeading">New announcement</h2>
-      <div class="msg" id="msgBox"></div>
-      <form id="annForm">
-        <div>
-          <label for="annTitle">Title</label>
-          <input type="text" id="annTitle" required placeholder="e.g. Water tank cleaning — Phase 1 &amp; 3" />
-        </div>
-        <div>
-          <label for="annDesc">Description</label>
-          <textarea id="annDesc" required placeholder="Details residents need to know"></textarea>
-        </div>
-        <fieldset>
-          <legend>Show on homepage</legend>
-          <div class="pill-group">
-            <input type="radio" name="annShow" id="showYes" value="true" checked>
-            <label for="showYes">Yes</label>
-            <input type="radio" name="annShow" id="showNo" value="false">
-            <label for="showNo">No</label>
-          </div>
-        </fieldset>
-        <div class="row">
-          <div>
-            <label for="annPublish">Publish date &amp; time</label>
-            <input type="datetime-local" id="annPublish" required />
-            <div class="hint">When this should appear on the homepage.</div>
-          </div>
-          <div>
-            <label for="annExpiry">Expiry date &amp; time (optional)</label>
-            <input type="datetime-local" id="annExpiry" />
-            <div class="hint">Leave blank to keep it up until you delete it manually.</div>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn-primary" id="annSubmitBtn">Publish announcement</button>
-          <button type="button" class="btn-cancel" id="annCancelBtn" style="display:none;">Cancel edit</button>
-        </div>
-      </form>
-    </div>
+    <div class="card-grid">
+      <a href="admin-announcements.html" class="feature-card">
+        <h3>Announcements</h3>
+        <p>Publish, edit, hide or delete homepage announcements.</p>
+        <span class="arrow">Open →</span>
+      </a>
 
-    <div class="panel">
-      <h2>All announcements</h2>
-      <div id="annList"></div>
+      <a href="admin-bookings.html" class="feature-card">
+        <h3>Community Hall Bookings</h3>
+        <p>View all bookings, mark payments received, and cancel if needed.</p>
+        <span class="arrow">Open →</span>
+      </a>
+
+      <div class="feature-card disabled">
+        <h3>Resident Directory</h3>
+        <p>Browse and search registered residents by tower, floor and flat.</p>
+        <span class="badge-soon">Coming soon</span>
+      </div>
+
+      <div class="feature-card disabled">
+        <h3>Maintenance Requests</h3>
+        <p>Track and respond to resident-submitted maintenance issues.</p>
+        <span class="badge-soon">Coming soon</span>
+      </div>
     </div>
   </main>
 </div>
@@ -235,23 +148,6 @@
   const gateView = document.getElementById('gateView');
   const app = document.getElementById('app');
   const navRight = document.getElementById('navRight');
-  const msgBox = document.getElementById('msgBox');
-  const annForm = document.getElementById('annForm');
-  const annList = document.getElementById('annList');
-  const formHeading = document.getElementById('formHeading');
-  const annSubmitBtn = document.getElementById('annSubmitBtn');
-  const annCancelBtn = document.getElementById('annCancelBtn');
-
-  let editingId = null; // set when editing an existing announcement
-
-  function showMessage(text, type){ msgBox.textContent = text; msgBox.className = 'msg ' + type; }
-  function clearMessage(){ msgBox.className = 'msg'; msgBox.textContent = ''; }
-
-  function toLocalInputValue(date){
-    // Format a JS Date as the value datetime-local inputs expect, in local time
-    const pad = n => String(n).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  }
 
   auth.onAuthStateChanged(async (user) => {
     if(!user){
@@ -259,9 +155,10 @@
       app.classList.remove('active');
       return;
     }
-    // Try a read that only admins are allowed — confirms access via the security rules themselves
+    // Confirm admin access the same way the rest of the dashboard does —
+    // by attempting a bulk read of residents, which only admins are allowed.
     try {
-      await db.collection('announcements').limit(1).get();
+      await db.collection('residents').get();
       gateView.classList.remove('active');
       app.classList.add('active');
       navRight.innerHTML = `
@@ -269,178 +166,9 @@
         <button class="btn-logout" id="logoutBtn">Log out</button>
       `;
       document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
-      loadAnnouncements();
     } catch (err) {
       gateView.classList.add('active');
       app.classList.remove('active');
-    }
-  });
-
-  function computeStatus(publishAt, expiryAt, show){
-    if(show === false) return { label: 'Hidden', cls: 'status-hidden' };
-    const now = new Date();
-    if(publishAt > now) return { label: 'Scheduled', cls: 'status-scheduled' };
-    if(expiryAt && expiryAt < now) return { label: 'Expired', cls: 'status-expired' };
-    return { label: 'Live', cls: 'status-live' };
-  }
-
-  function formatDate(date){
-    if(!date) return null;
-    return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-  }
-
-  async function loadAnnouncements(){
-    annList.innerHTML = '<div class="empty-state">Loading…</div>';
-    try {
-      const snapshot = await db.collection('announcements').orderBy('publishAt', 'desc').get();
-      if(snapshot.empty){
-        annList.innerHTML = '<div class="empty-state">No announcements yet — publish your first one above.</div>';
-        return;
-      }
-      annList.innerHTML = '';
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const publishAt = d.publishAt ? d.publishAt.toDate() : null;
-        const expiryAt = d.expiryAt ? d.expiryAt.toDate() : null;
-        const show = d.show !== false; // treat missing field as shown, for older records
-        const status = computeStatus(publishAt, expiryAt, show);
-
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="li-main">
-            <div class="li-title-row">
-              <h3>${escapeHtml(d.title)}</h3>
-              <span class="status-badge ${status.cls}">${status.label}</span>
-            </div>
-            <p class="li-desc">${escapeHtml(d.description)}</p>
-            <div class="li-dates">
-              <span>Publishes: ${formatDate(publishAt) || '—'}</span>
-              <span>Expires: ${expiryAt ? formatDate(expiryAt) : 'Never (manual only)'}</span>
-            </div>
-          </div>
-          <div class="li-actions">
-            <button class="btn-small" data-toggle="${doc.id}" data-current="${show}">${show ? 'Hide' : 'Show'}</button>
-            <button class="btn-small" data-edit="${doc.id}">Edit</button>
-            <button class="btn-small danger" data-delete="${doc.id}">Delete</button>
-          </div>
-        `;
-        annList.appendChild(item);
-      });
-
-      annList.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => startEdit(btn.dataset.edit));
-      });
-      annList.querySelectorAll('[data-delete]').forEach(btn => {
-        btn.addEventListener('click', () => deleteAnnouncement(btn.dataset.delete));
-      });
-      annList.querySelectorAll('[data-toggle]').forEach(btn => {
-        btn.addEventListener('click', () => toggleShow(btn.dataset.toggle, btn.dataset.current === 'true'));
-      });
-    } catch (err) {
-      annList.innerHTML = `<div class="empty-state">Couldn't load announcements: ${err.message}</div>`;
-    }
-  }
-
-  async function toggleShow(id, currentlyShown){
-    try {
-      await db.collection('announcements').doc(id).update({ show: !currentlyShown });
-      loadAnnouncements();
-    } catch (err) {
-      showMessage('Couldn\u2019t update: ' + err.message, 'error');
-    }
-  }
-
-  function escapeHtml(str){
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
-
-  async function startEdit(id){
-    clearMessage();
-    const doc = await db.collection('announcements').doc(id).get();
-    if(!doc.exists) return;
-    const d = doc.data();
-    editingId = id;
-    document.getElementById('annTitle').value = d.title || '';
-    document.getElementById('annDesc').value = d.description || '';
-    document.getElementById('annPublish').value = d.publishAt ? toLocalInputValue(d.publishAt.toDate()) : '';
-    document.getElementById('annExpiry').value = d.expiryAt ? toLocalInputValue(d.expiryAt.toDate()) : '';
-    document.getElementById(d.show === false ? 'showNo' : 'showYes').checked = true;
-    formHeading.textContent = 'Edit announcement';
-    annSubmitBtn.textContent = 'Save changes';
-    annCancelBtn.style.display = 'inline';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function resetForm(){
-    editingId = null;
-    annForm.reset();
-    formHeading.textContent = 'New announcement';
-    annSubmitBtn.textContent = 'Publish announcement';
-    annCancelBtn.style.display = 'none';
-    clearMessage();
-  }
-  annCancelBtn.addEventListener('click', resetForm);
-
-  async function deleteAnnouncement(id){
-    if(!confirm('Delete this announcement permanently? This cannot be undone.')) return;
-    try {
-      await db.collection('announcements').doc(id).delete();
-      loadAnnouncements();
-      if(editingId === id) resetForm();
-    } catch (err) {
-      showMessage('Couldn\u2019t delete: ' + err.message, 'error');
-    }
-  }
-
-  annForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearMessage();
-
-    const title = document.getElementById('annTitle').value.trim();
-    const description = document.getElementById('annDesc').value.trim();
-    const publishVal = document.getElementById('annPublish').value;
-    const expiryVal = document.getElementById('annExpiry').value;
-
-    if(!publishVal){
-      showMessage('Please set a publish date and time.', 'error');
-      return;
-    }
-    const publishAt = new Date(publishVal);
-    const expiryAt = expiryVal ? new Date(expiryVal) : null;
-
-    if(expiryAt && expiryAt <= publishAt){
-      showMessage('Expiry must be after the publish date and time.', 'error');
-      return;
-    }
-
-    annSubmitBtn.disabled = true;
-    annSubmitBtn.textContent = editingId ? 'Saving…' : 'Publishing…';
-
-    const payload = {
-      title, description,
-      publishAt: firebase.firestore.Timestamp.fromDate(publishAt),
-      expiryAt: expiryAt ? firebase.firestore.Timestamp.fromDate(expiryAt) : null,
-      show: document.querySelector('input[name=annShow]:checked').value === 'true'
-    };
-
-    try {
-      if(editingId){
-        await db.collection('announcements').doc(editingId).update(payload);
-        showMessage('Announcement updated.', 'success');
-      } else {
-        payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        await db.collection('announcements').add(payload);
-        showMessage('Announcement published.', 'success');
-      }
-      resetForm();
-      loadAnnouncements();
-    } catch (err) {
-      showMessage('Something went wrong: ' + err.message, 'error');
-      annSubmitBtn.disabled = false;
-      annSubmitBtn.textContent = editingId ? 'Save changes' : 'Publish announcement';
     }
   });
 </script>
