@@ -64,10 +64,10 @@
   /* Timeline */
   .timeline-scroll{ overflow-x:auto; padding-bottom:6px; }
   .timeline-track{
-    position:relative; height:52px; min-width:900px; background:var(--green); opacity:0.15;
+    position:relative; height:52px; min-width:1080px; background:var(--green); opacity:0.15;
     border-radius:var(--radius);
   }
-  .timeline-wrap{ position:relative; min-width:900px; }
+  .timeline-wrap{ position:relative; min-width:1080px; }
   .timeline-track-bg{
     position:absolute; inset:0; background:rgba(61,94,51,0.14); border-radius:var(--radius); height:52px;
   }
@@ -79,7 +79,7 @@
   .seg-yellow{ background:var(--yellow); }
   .seg-red{ background:var(--red); }
   .timeline-labels{
-    position:relative; min-width:900px; display:flex; justify-content:space-between;
+    position:relative; min-width:1080px; display:flex; justify-content:space-between;
     margin-top:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
   }
   .legend{ display:flex; gap:18px; margin-top:14px; font-size:12.5px; color:var(--ink-soft); flex-wrap:wrap; }
@@ -273,8 +273,8 @@
   const db = firebase.firestore();
 
   const RATE_PER_HOUR = 1500;
-  const HALL_OPEN_MIN = 8 * 60;   // 08:00
-  const HALL_CLOSE_MIN = 23 * 60; // 23:00
+  const HALL_OPEN_MIN = 0;      // 00:00
+  const HALL_CLOSE_MIN = 24 * 60; // 24:00
   const SPAN_MIN = HALL_CLOSE_MIN - HALL_OPEN_MIN;
 
   const gateView = document.getElementById('gateView');
@@ -365,7 +365,7 @@
   function renderHourLabels(){
     const labels = document.getElementById('timelineLabels');
     labels.innerHTML = '';
-    for(let m = HALL_OPEN_MIN; m <= HALL_CLOSE_MIN; m += 60){
+    for(let m = HALL_OPEN_MIN; m < HALL_CLOSE_MIN; m += 60){
       const span = document.createElement('span');
       span.textContent = minutesToLabel(m).replace(':00','');
       labels.appendChild(span);
