@@ -65,7 +65,7 @@
   }
   .brand-mark{
     width:30px; height:30px; flex-shrink:0;
-  }
+   object-fit:cover; border-radius:50%; display:block;}
   .nav-links{
     display:flex; align-items:center; gap:34px; list-style:none; margin:0; padding:0;
   }
@@ -241,11 +241,7 @@
 <header>
   <nav class="wrap">
     <a href="#top" class="brand">
-      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
-        <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
-        <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
-        <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
-      </svg>
+      <img src="logo.png" alt="Lakewood Estate" class="brand-mark">
       Lakewood&nbsp;Estate
     </a>
     <ul class="nav-links">
