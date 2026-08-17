@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hall Bookings — Lakewood Estate Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lake-deep:#0F3A3A; --lake-mid:#1E5F57; --moss:#7C9473;
+    --walnut:#6B4226; --paper:#EEF0E6; --paper-warm:#E4E6D8;
+    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E; --error:#A6402F;
+    --paid:#3D5E33; --pending:#8A6A1F;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{color:inherit;}
+  .wrap{max-width:1000px; margin:0 auto; padding:0 24px;}
+
+  header{ background:#fff; border-bottom:1px solid rgba(22,33,29,0.1); }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:72px; }
+  .brand{
+    display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
+    font-family:'Fraunces',serif; font-size:18px; font-weight:600;
+  }
+  .brand-mark{ width:24px; height:24px; flex-shrink:0; }
+  .nav-right{ display:flex; align-items:center; gap:16px; font-size:14px; color:var(--ink-soft); }
+  .btn-logout{
+    background:none; border:1px solid rgba(22,33,29,0.22); color:var(--ink);
+    border-radius:var(--radius); padding:8px 14px; font-family:'Inter',sans-serif;
+    font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .btn-logout:hover{ border-color:var(--ink); background:var(--paper-warm); }
+
+  main{ padding:44px 0 80px; }
+  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:28px; margin:0 0 6px; }
+  .sub{ font-size:14.5px; color:var(--ink-soft); margin:0 0 28px; }
+
+  .filters{ display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .filters select, .filters input{
+    padding:10px 12px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
+    font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink);
+  }
+
+  .panel{ background:#fff; border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius); padding:8px 28px; }
+
+  .list-item{
+    display:flex; justify-content:space-between; gap:20px;
+    padding:20px 0; border-top:1px solid rgba(22,33,29,0.1);
+  }
+  .list-item:first-child{ border-top:none; }
+  .li-main{ flex:1; min-width:0; }
+  .li-title-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+  .li-title-row h3{ font-family:'Fraunces',serif; font-weight:500; font-size:17px; margin:0; }
+  .status-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:var(--radius); color:#fff;
+  }
+  .status-paid{ background:var(--paid); }
+  .status-pending{ background:var(--pending); }
+  .li-detail{ font-size:14px; color:var(--ink-soft); line-height:1.6; }
+  .li-detail strong{ color:var(--ink); }
+  .li-fee{
+    font-family:'Fraunces',serif; font-size:17px; font-weight:600; margin-top:6px;
+  }
+  .li-actions{ display:flex; gap:8px; flex-shrink:0; align-items:flex-start; }
+  .btn-small{
+    background:none; border:1px solid rgba(22,33,29,0.2); color:var(--ink);
+    border-radius:var(--radius); padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:'Inter',sans-serif; white-space:nowrap;
+  }
+  .btn-small:hover{ background:var(--paper-warm); }
+  .btn-small.primary{ background:var(--lake-deep); color:#fff; border-color:var(--lake-deep); }
+  .btn-small.primary:hover{ background:var(--lake-mid); }
+  .btn-small.danger{ color:var(--error); border-color:rgba(166,64,47,0.4); }
+  .btn-small.danger:hover{ background:#FBEAE6; }
+
+  .empty-state{ text-align:center; padding:50px 0; color:var(--ink-soft); font-size:14px; }
+
+  .gate{ text-align:center; padding:90px 0; }
+  .gate p{ color:var(--ink-soft); margin-bottom:24px; }
+  .gate a.btn{
+    display:inline-block; background:var(--walnut); color:var(--paper); text-decoration:none;
+    padding:12px 24px; border-radius:var(--radius); font-weight:600; font-size:14.5px;
+  }
+
+  #app, #gateView{ display:none; }
+  #app.active, #gateView.active{ display:block; }
+
+  @media (max-width:640px){
+    .list-item{ flex-direction:column; }
+    .li-actions{ flex-direction:row; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="admin.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
+        <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
+        <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
+      </svg>
+      ← Dashboard · Hall Bookings
+    </a>
+    <div class="nav-right" id="navRight"></div>
+  </nav>
+</header>
+
+<div id="gateView" class="wrap gate">
+  <h1>Committee access only</h1>
+  <p>Sign in with a committee account to manage hall bookings.</p>
+  <a href="login.html" class="btn">Go to sign in</a>
+</div>
+
+<div id="app">
+  <main class="wrap">
+    <h1>Community Hall Bookings</h1>
+    <p class="sub">View every booking, mark payments received, or cancel if needed.</p>
+
+    <div class="filters">
+      <select id="filterPaid">
+        <option value="all">All bookings</option>
+        <option value="pending">Payment pending</option>
+        <option value="paid">Paid</option>
+      </select>
+      <input type="date" id="filterDate" />
+      <button class="btn-small" id="clearFilters">Clear filters</button>
+    </div>
+
+    <div class="panel">
+      <div id="bookingsList"></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
+    authDomain: "lakewood-estate.firebaseapp.com",
+    projectId: "lakewood-estate",
+    storageBucket: "lakewood-estate.firebasestorage.app",
+    messagingSenderId: "730103645174",
+    appId: "1:730103645174:web:c8af4a01c36bd53df9bdd7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const gateView = document.getElementById('gateView');
+  const app = document.getElementById('app');
+  const navRight = document.getElementById('navRight');
+  const bookingsList = document.getElementById('bookingsList');
+  const filterPaid = document.getElementById('filterPaid');
+  const filterDate = document.getElementById('filterDate');
+
+  let allBookings = [];
+
+  auth.onAuthStateChanged(async (user) => {
+    if(!user){ gateView.classList.add('active'); app.classList.remove('active'); return; }
+    try {
+      await db.collection('residents').get(); // admin-only bulk read confirms access
+      gateView.classList.remove('active');
+      app.classList.add('active');
+      navRight.innerHTML = `
+        <span>${user.displayName || user.email}</span>
+        <button class="btn-logout" id="logoutBtn">Log out</button>
+      `;
+      document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+      loadBookings();
+    } catch (err) {
+      gateView.classList.add('active');
+      app.classList.remove('active');
+    }
+  });
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function formatDate(dateStr){
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  async function loadBookings(){
+    bookingsList.innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const snapshot = await db.collection('hallBookings').orderBy('bookingDate', 'desc').get();
+      allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      render();
+    } catch (err) {
+      bookingsList.innerHTML = `<div class="empty-state">Couldn't load bookings: ${err.message}</div>`;
+    }
+  }
+
+  function render(){
+    let filtered = allBookings;
+    if(filterPaid.value === 'paid') filtered = filtered.filter(b => b.paid);
+    if(filterPaid.value === 'pending') filtered = filtered.filter(b => !b.paid);
+    if(filterDate.value) filtered = filtered.filter(b => b.bookingDate === filterDate.value);
+
+    if(filtered.length === 0){
+      bookingsList.innerHTML = '<div class="empty-state">No bookings match these filters.</div>';
+      return;
+    }
+
+    bookingsList.innerHTML = filtered.map(b => `
+      <div class="list-item">
+        <div class="li-main">
+          <div class="li-title-row">
+            <h3>${escapeHtml(b.name)} — ${escapeHtml(b.flat)}</h3>
+            <span class="status-badge ${b.paid ? 'status-paid' : 'status-pending'}">${b.paid ? 'Paid' : 'Payment pending'}</span>
+          </div>
+          <div class="li-detail">
+            ${formatDate(b.bookingDate)} · ${escapeHtml(b.startTime)}–${escapeHtml(b.endTime)}
+            (${b.billableHours} billable hr${b.billableHours === 1 ? '' : 's'})<br>
+            ${escapeHtml(b.phone || '')} · ${escapeHtml(b.email || '')}
+          </div>
+          <div class="li-fee">₹${(b.totalFee || 0).toLocaleString('en-IN')}</div>
+        </div>
+        <div class="li-actions">
+          ${b.paid
+            ? `<button class="btn-small" data-unpaid="${b.id}">Mark unpaid</button>`
+            : `<button class="btn-small primary" data-paid="${b.id}">Mark paid</button>`
+          }
+          <button class="btn-small danger" data-cancel="${b.id}">Cancel</button>
+        </div>
+      </div>
+    `).join('');
+
+    bookingsList.querySelectorAll('[data-paid]').forEach(btn =>
+      btn.addEventListener('click', () => setPaid(btn.dataset.paid, true)));
+    bookingsList.querySelectorAll('[data-unpaid]').forEach(btn =>
+      btn.addEventListener('click', () => setPaid(btn.dataset.unpaid, false)));
+    bookingsList.querySelectorAll('[data-cancel]').forEach(btn =>
+      btn.addEventListener('click', () => cancelBooking(btn.dataset.cancel)));
+  }
+
+  async function setPaid(id, value){
+    try {
+      await db.collection('hallBookings').doc(id).update({ paid: value });
+      loadBookings();
+    } catch (err) {
+      alert('Couldn\u2019t update payment status: ' + err.message);
+    }
+  }
+
+  async function cancelBooking(id){
+    if(!confirm('Cancel this booking permanently? This frees up the time slot and cannot be undone.')) return;
+    try {
+      await db.collection('hallBookings').doc(id).delete();
+      loadBookings();
+    } catch (err) {
+      alert('Couldn\u2019t cancel: ' + err.message);
+    }
+  }
+
+  filterPaid.addEventListener('change', render);
+  filterDate.addEventListener('change', render);
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    filterPaid.value = 'all';
+    filterDate.value = '';
+    render();
+  });
+</script>
+
+</body>
+</html>
