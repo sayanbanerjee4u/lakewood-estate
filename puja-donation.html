@@ -57,6 +57,10 @@
   .item-row input[type=checkbox]{ width:18px; height:18px; accent-color:var(--lake-deep); flex-shrink:0; }
   .item-info{ flex:1; min-width:0; }
   .item-name{ font-size:14.5px; font-weight:600; }
+  .item-head{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--moss); margin-bottom:2px;
+  }
   .item-claimed-by{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
   .item-amount{ font-family:'Fraunces',serif; font-size:16px; font-weight:600; white-space:nowrap; }
   .item-status{
@@ -201,6 +205,7 @@
     const header = rows[0].map(h => h.trim().toLowerCase());
     let itemCol = header.findIndex(h => h.includes('item'));
     let amountCol = header.findIndex(h => h.includes('amount') || h.includes('price') || h.includes('rate'));
+    let headCol = header.findIndex(h => h.includes('head'));
     if(itemCol === -1) itemCol = 0;
     if(amountCol === -1) amountCol = 1;
 
@@ -212,9 +217,10 @@
       if(!itemName) continue;
       const rawAmount = (r[amountCol] || '').replace(/[^0-9.]/g, '');
       const amount = parseFloat(rawAmount) || 0;
+      const head = headCol !== -1 ? (r[headCol] || '').trim() : '';
       let key = slugify(itemName);
       if(seenKeys[key]){ seenKeys[key]++; key = `${key}-${seenKeys[key]}`; } else { seenKeys[key] = 1; }
-      items.push({ itemKey: key, itemName, amount });
+      items.push({ itemKey: key, itemName, amount, head });
     }
     return items;
   }
@@ -264,6 +270,7 @@
         <div class="item-row">
           <input type="checkbox" data-item="${it.itemKey}" ${disabled ? 'disabled' : ''}>
           <div class="item-info">
+            ${it.head ? `<div class="item-head">${escapeHtml(it.head)}</div>` : ''}
             <div class="item-name">${escapeHtml(it.itemName)}</div>
             ${claim ? `<div class="item-claimed-by">Claimed by ${escapeHtml(claim.proposerName)}</div>` : ''}
           </div>
@@ -338,6 +345,7 @@
     const rows = sheetItems.map(it => {
       const claim = claimsByKey[it.itemKey];
       return {
+        'Head': it.head || '',
         'Item': it.itemName,
         'Amount': it.amount,
         'Status': claim ? 'Claimed' : 'Available',
@@ -345,7 +353,7 @@
       };
     });
     const worksheet = XLSX.utils.json_to_sheet(rows);
-    worksheet['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 24 }];
+    worksheet['!cols'] = [{ wch: 18 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 24 }];
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Puja Donations');
     const dateStamp = new Date().toISOString().slice(0,10);
