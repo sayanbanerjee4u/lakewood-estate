@@ -65,7 +65,7 @@
   }
   .brand-mark{
     width:30px; height:30px; flex-shrink:0;
-  }
+   object-fit:cover; border-radius:50%; display:block;}
   .nav-links{
     display:flex; align-items:center; gap:34px; list-style:none; margin:0; padding:0;
   }
@@ -241,11 +241,7 @@
 <header>
   <nav class="wrap">
     <a href="#top" class="brand">
-      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
-        <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
-        <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
-        <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
-      </svg>
+      <img src="logo.png" alt="Lakewood Estate" class="brand-mark">
       Lakewood&nbsp;Estate
     </a>
     <ul class="nav-links">
@@ -377,6 +373,16 @@
     <div>
       <h3>Lakewood Estate</h3>
       <p>One community, one site. Maintained by the residents' committee for all phases.</p>
+      <p style="margin-top:14px; font-size:13px; color:rgba(238,240,230,0.65); line-height:1.6;">
+        266 Garagacha, Patuli<br>
+        South 24 Parganas – 700084<br>
+        PO: Garia · PS: Narendrapur
+      </p>
+      <a href="https://www.google.com/maps/place/Lakewood+Estate/@22.470651,88.3949313,16z/data=!3m1!4b1!4m6!3m5!1s0x3a02717f3c28733f:0x75eaac223af92de8!8m2!3d22.4706461!4d88.3975062!16s%2Fg%2F11b76dn4kk?entry=ttu&g_ep=EgoyMDI2MDgxMi4wIKXMDSoASAFQAw%3D%3D"
+         target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:6px; margin-top:14px; font-size:13px; color:var(--brass); text-decoration:none; font-weight:600;">
+        View on Google Maps ↗
+      </a>
     </div>
     <div class="footer-cols">
       <div class="footer-col">
@@ -387,7 +393,7 @@
       </div>
       <div class="footer-col">
         <h4>Committee</h4>
-        <a href="#">Contact us</a>
+        <a href="contact.html">Contact us</a>
         <a href="#">Financial reports</a>
       </div>
     </div>
