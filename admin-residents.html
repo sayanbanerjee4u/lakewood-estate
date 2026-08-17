@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resident Directory — Lakewood Estate Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lake-deep:#0F3A3A; --lake-mid:#1E5F57; --moss:#7C9473;
+    --walnut:#6B4226; --paper:#EEF0E6; --paper-warm:#E4E6D8;
+    --brass:#C79A3D; --ink:#16211D; --ink-soft:#45564E; --error:#A6402F;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{color:inherit;}
+  .wrap{max-width:1140px; margin:0 auto; padding:0 24px;}
+
+  header{ background:#fff; border-bottom:1px solid rgba(22,33,29,0.1); }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:72px; }
+  .brand{
+    display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink);
+    font-family:'Fraunces',serif; font-size:18px; font-weight:600;
+  }
+  .brand-mark{ width:24px; height:24px; flex-shrink:0; }
+  .nav-right{ display:flex; align-items:center; gap:16px; font-size:14px; color:var(--ink-soft); }
+  .btn-logout{
+    background:none; border:1px solid rgba(22,33,29,0.22); color:var(--ink);
+    border-radius:var(--radius); padding:8px 14px; font-family:'Inter',sans-serif;
+    font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .btn-logout:hover{ border-color:var(--ink); background:var(--paper-warm); }
+
+  main{ padding:44px 0 80px; }
+  .top-row{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:26px; }
+  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:28px; margin:0 0 6px; }
+  .sub{ font-size:14.5px; color:var(--ink-soft); margin:0; }
+
+  .btn-primary{
+    background:var(--walnut); color:var(--paper); border:none; border-radius:var(--radius);
+    padding:12px 20px; font-weight:600; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif;
+    white-space:nowrap;
+  }
+  .btn-primary:hover{ background:#5a3620; }
+  .btn-primary:disabled{ opacity:0.6; cursor:wait; }
+
+  .filters{ display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .filters input, .filters select{
+    padding:10px 12px; border:1px solid rgba(22,33,29,0.2); border-radius:var(--radius);
+    font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink);
+  }
+  .filters input[type=text]{ min-width:220px; }
+
+  .panel{ background:#fff; border:1px solid rgba(22,33,29,0.1); border-radius:var(--radius); overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:920px; }
+  th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--ink-soft); padding:14px 16px; border-bottom:1px solid rgba(22,33,29,0.12);
+    white-space:nowrap;
+  }
+  td{ padding:14px 16px; font-size:13.5px; border-bottom:1px solid rgba(22,33,29,0.08); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:var(--paper-warm); }
+  .pill{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase;
+    padding:3px 8px; border-radius:var(--radius); background:var(--paper-warm); color:var(--ink-soft); white-space:nowrap;
+  }
+  .empty-state{ text-align:center; padding:60px 0; color:var(--ink-soft); font-size:14px; }
+  .count-note{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-top:14px; }
+
+  .msg{ font-size:13.5px; padding:10px 12px; border-radius:var(--radius); display:none; line-height:1.5; margin-bottom:16px; }
+  .msg.error{ background:#FBEAE6; color:var(--error); display:block; }
+  .msg.success{ background:#E9F0E5; color:#3D5E33; display:block; }
+
+  .gate{ text-align:center; padding:90px 0; }
+  .gate p{ color:var(--ink-soft); margin-bottom:24px; }
+  .gate a.btn{
+    display:inline-block; background:var(--walnut); color:var(--paper); text-decoration:none;
+    padding:12px 24px; border-radius:var(--radius); font-weight:600; font-size:14.5px;
+  }
+
+  #app, #gateView{ display:none; }
+  #app.active, #gateView.active{ display:block; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="admin.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="14" stroke="#0F3A3A" stroke-width="1.4"/>
+        <path d="M4 17c3-2 6-2 9 0s6 2 9 0" stroke="#0F3A3A" stroke-width="1.4" fill="none"/>
+        <path d="M4 21c3-2 6-2 9 0s6 2 9 0" stroke="#7C9473" stroke-width="1.4" fill="none"/>
+      </svg>
+      ← Dashboard · Resident Directory
+    </a>
+    <div class="nav-right" id="navRight"></div>
+  </nav>
+</header>
+
+<div id="gateView" class="wrap gate">
+  <h1>Committee access only</h1>
+  <p>Sign in with a committee account to view resident records.</p>
+  <a href="login.html" class="btn">Go to sign in</a>
+</div>
+
+<div id="app">
+  <main class="wrap">
+    <div class="top-row">
+      <div>
+        <h1>Resident Directory</h1>
+        <p class="sub">Every registered resident, pulled live from your database.</p>
+      </div>
+      <button class="btn-primary" id="exportBtn">Download as Excel</button>
+    </div>
+
+    <div class="msg" id="msgBox"></div>
+
+    <div class="filters">
+      <input type="text" id="searchBox" placeholder="Search name, email, flat…" />
+      <select id="towerFilter">
+        <option value="">All towers</option>
+        <option value="1">Tower 1</option>
+        <option value="2">Tower 2</option>
+        <option value="3">Tower 3</option>
+        <option value="4">Tower 4</option>
+        <option value="5">Tower 5</option>
+        <option value="6">Tower 6</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <table id="residentTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Flat</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Parking</th>
+            <th>Vehicle</th>
+          </tr>
+        </thead>
+        <tbody id="residentRows"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state">Loading…</div>
+    </div>
+    <div class="count-note" id="countNote"></div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDBDXGipe7fPs6KSElX0e4ogCO5NISaG0",
+    authDomain: "lakewood-estate.firebaseapp.com",
+    projectId: "lakewood-estate",
+    storageBucket: "lakewood-estate.firebasestorage.app",
+    messagingSenderId: "730103645174",
+    appId: "1:730103645174:web:c8af4a01c36bd53df9bdd7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const gateView = document.getElementById('gateView');
+  const app = document.getElementById('app');
+  const navRight = document.getElementById('navRight');
+  const msgBox = document.getElementById('msgBox');
+  const residentTable = document.getElementById('residentTable');
+  const residentRows = document.getElementById('residentRows');
+  const emptyState = document.getElementById('emptyState');
+  const countNote = document.getElementById('countNote');
+  const searchBox = document.getElementById('searchBox');
+  const towerFilter = document.getElementById('towerFilter');
+  const exportBtn = document.getElementById('exportBtn');
+
+  let allResidents = [];
+
+  function showMessage(text, type){ msgBox.textContent = text; msgBox.className = 'msg ' + type; }
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    if(!user){ gateView.classList.add('active'); app.classList.remove('active'); return; }
+    try {
+      const snapshot = await db.collection('residents').get(); // admin-only bulk read
+      allResidents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      gateView.classList.remove('active');
+      app.classList.add('active');
+      navRight.innerHTML = `
+        <span>${user.displayName || user.email}</span>
+        <button class="btn-logout" id="logoutBtn">Log out</button>
+      `;
+      document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+      render();
+    } catch (err) {
+      gateView.classList.add('active');
+      app.classList.remove('active');
+    }
+  });
+
+  function render(){
+    const search = searchBox.value.trim().toLowerCase();
+    const tower = towerFilter.value;
+
+    const filtered = allResidents.filter(r => {
+      if(tower && String(r.tower) !== tower) return false;
+      if(search){
+        const haystack = `${r.name || ''} ${r.email || ''} Tower${r.tower}/${r.floor}${r.flat}`.toLowerCase();
+        if(!haystack.includes(search)) return false;
+      }
+      return true;
+    });
+
+    if(filtered.length === 0){
+      residentTable.style.display = 'none';
+      emptyState.style.display = 'block';
+      emptyState.textContent = allResidents.length === 0
+        ? 'No residents have registered yet.'
+        : 'No residents match your search.';
+      countNote.textContent = '';
+      return;
+    }
+
+    residentTable.style.display = 'table';
+    emptyState.style.display = 'none';
+    residentRows.innerHTML = filtered.map(r => `
+      <tr>
+        <td><strong>${escapeHtml(r.name)}</strong></td>
+        <td><span class="pill">${escapeHtml(r.occupantType)}</span></td>
+        <td>Tower${escapeHtml(r.tower)}/${escapeHtml(r.floor)}${escapeHtml(r.flat)}</td>
+        <td>${escapeHtml(r.mobile)}</td>
+        <td>${escapeHtml(r.email)}</td>
+        <td>${escapeHtml(r.parkingType || '—')}${r.parkingNumber ? ' · ' + escapeHtml(r.parkingNumber) : ''}</td>
+        <td>${escapeHtml(r.vehicleNumber) || '—'}</td>
+      </tr>
+    `).join('');
+
+    countNote.textContent = `Showing ${filtered.length} of ${allResidents.length} resident${allResidents.length === 1 ? '' : 's'}.`;
+  }
+
+  searchBox.addEventListener('input', render);
+  towerFilter.addEventListener('change', render);
+
+  exportBtn.addEventListener('click', () => {
+    if(allResidents.length === 0){
+      showMessage('No resident records to export yet.', 'error');
+      return;
+    }
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Preparing file…';
+
+    try {
+      const rows = allResidents.map(d => ({
+        'Name': d.name || '',
+        'Occupant Type': d.occupantType || '',
+        'Email': d.email || '',
+        'Mobile': d.mobile || '',
+        'Tower': d.tower || '',
+        'Floor': d.floor || '',
+        'Flat': d.flat || '',
+        'Parking Type': d.parkingType || '',
+        'Parking Number': d.parkingNumber || '',
+        'Vehicle Number': d.vehicleNumber || '',
+        'Registered On': d.createdAt ? d.createdAt.toDate().toLocaleString() : ''
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      worksheet['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 18 }));
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Residents');
+
+      const dateStamp = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(workbook, `lakewood-residents-${dateStamp}.xlsx`);
+      showMessage(`Downloaded ${rows.length} resident record${rows.length === 1 ? '' : 's'}.`, 'success');
+    } catch (err) {
+      showMessage('Something went wrong creating the file: ' + err.message, 'error');
+    }
+
+    exportBtn.disabled = false;
+    exportBtn.textContent = 'Download as Excel';
+  });
+</script>
+
+</body>
+</html>
